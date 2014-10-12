@@ -1,1 +1,1 @@
-log4j-journald-adapter.h
+log4j-systemd-journal-adapter.h
