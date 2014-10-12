@@ -1,0 +1,17 @@
+.*.swp
+/.idea
+/.classpath
+/.project
+/.settings
+/.gradle
+/target
+/build
+
+*.class
+*.so
+bin/
+build/
+
+hs_err_pid*.log
+
+release.properties

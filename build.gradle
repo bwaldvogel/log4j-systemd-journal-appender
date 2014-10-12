@@ -1,0 +1,87 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'nexus'
+
+version = '1.0.0-SNAPSHOT'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+ext {
+    title = 'log4j-systemd-journal-appender'
+    description = 'Log4j appender for systemd journal.'
+    url = 'https://www.github.com/bwaldvogel/log4j-systemd-journal-appender'
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': title, 'Implementation-Version': version
+    }
+}
+
+// https://github.com/bmuschko/gradle-nexus-plugin
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7.1'
+    }
+}
+
+ext {
+    log4jVersion = '1.2.17'
+}
+
+modifyPom {
+    project {
+        groupId        'de.bwaldvogel'
+        artifactId     'log4j-systemd-journal-appender'
+        name           title
+        description    description
+        url            url
+        inceptionYear '2014'
+
+        scm {
+            url 'git@github.com:bwaldvogel/log4j-systemd-journal-appender.git'
+            connection 'scm:git:git@github.com:bwaldvogel/log4j-systemd-journal-appender.git'
+            developerConnection 'scm:git:git@github.com:bwaldvogel/log4j-systemd-journal-appender.git'
+        }
+
+        licenses {
+            license {
+                name 'The BSD License'
+                url 'http://www.opensource.org/licenses/bsd-license.php'
+                distribution 'repo'
+            }
+        }
+
+        developers {
+            developer {
+                id 'bwaldvogel'
+                name 'Benedikt Waldvogel'
+                email 'mail@bwaldvogel.de'
+            }
+        }
+    }
+}
+
+nexus {
+    attachSources = true
+    attachTests = false
+    attachJavadoc = true
+    sign = true
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'log4j', name: 'log4j', version: log4jVersion
+
+    testCompile group: 'junit', name: 'junit', version: '4.9'
+}
+
+// vim: set ts=4 sw=4 et:
