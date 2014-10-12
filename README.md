@@ -24,5 +24,5 @@ log4j.appender.journal=de.bwaldvogel.SystemdJournalAppender
 
 This will log to stdout (console) as well as to systemd-journal.
 
-[log4j]:
+[log4j]: http://logging.apache.org/log4j
 [systemd-journal]: http://www.freedesktop.org/software/systemd/man/systemd-journald.service.html
