@@ -25,6 +25,8 @@ public class SystemdJournalAppenderTest {
 
     @Test
     public void testMessages() {
+        LOGGER.trace("this is a test message with level TRACE");
+        LOGGER.debug("this is a test message with level DEBUG");
         LOGGER.info("this is a test message with level INFO");
         LOGGER.warn("this is a test message with level WARN");
         LOGGER.error("this is a test message with level ERROR");

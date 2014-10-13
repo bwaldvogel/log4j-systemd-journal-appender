@@ -25,7 +25,7 @@ public class SystemdJournalAppender extends AppenderSkeleton {
         return false;
     }
 
-    private String log4jLevelToJournalPriority(Level level) {
+    private int log4jLevelToJournalPriority(Level level) {
         //
         // syslog.h
         //
@@ -39,15 +39,17 @@ public class SystemdJournalAppender extends AppenderSkeleton {
         // #define LOG_DEBUG 7 - debug-level messages
         //
         if (level == Level.FATAL) {
-            return "2"; // LOG_CRIT
+            return 2; // LOG_CRIT
         } else if (level == Level.ERROR) {
-            return "3"; // LOG_ERR
+            return 3; // LOG_ERR
         } else if (level == Level.WARN) {
-            return "4"; // LOG_WARNING
+            return 4; // LOG_WARNING
         } else if (level == Level.INFO) {
-            return "6"; // LOG_INFO
+            return 6; // LOG_INFO
         } else if (level == Level.DEBUG) {
-            return "7"; // LOG_DEBUG
+            return 7; // LOG_DEBUG
+        } else if (level == Level.TRACE) {
+            return 7; // LOG_DEBUG
         } else {
             throw new IllegalArgumentException("Cannot map log level: " + level);
         }
@@ -58,7 +60,7 @@ public class SystemdJournalAppender extends AppenderSkeleton {
         Map<String, String> logData = new HashMap<String, String>();
 
         logData.put("MESSAGE", event.getRenderedMessage());
-        logData.put("PRIORITY", log4jLevelToJournalPriority(event.getLevel()));
+        logData.put("PRIORITY", String.valueOf(log4jLevelToJournalPriority(event.getLevel())));
 
         logData.put("THREAD_NAME", event.getThreadName());
         logData.put("LOG4J_LOGGER", event.getLogger().getName());
