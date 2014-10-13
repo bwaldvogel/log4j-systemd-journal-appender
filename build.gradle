@@ -2,7 +2,8 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'nexus'
 
-version = '1.0.0-SNAPSHOT'
+// version is platform specific because of JNI
+version = '1.0-' + System.properties['os.name'].toLowerCase() + "-" + System.properties['os.arch']
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
