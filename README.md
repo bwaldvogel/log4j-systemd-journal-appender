@@ -10,6 +10,7 @@ Add the following Maven dependency to your project:
 	<groupId>de.bwaldvogel</groupId>
 	<artifactId>log4j-systemd-journal-appender</artifactId>
 	<version>1.0-linux-amd64</version>
+	<scope>runtime</scope>
 </dependency>
 ```
 
@@ -44,9 +45,9 @@ This is because meta data of a log event such as the timestamp, the logger name 
 import org.apache.log4j.*;
 
 class YourExample {
-    
+
     private static Logger logger = Logger.getLogger(YourExample.class);
-    
+
     public static void main(String[] args) {
         MDC.put("MY_KEY", "some value");
         logger.info("this is an example");
