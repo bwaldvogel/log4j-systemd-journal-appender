@@ -2,19 +2,25 @@
 
 Read Lennart Poettering's blog post [systemd for Developers III][systemd-for-developers] if you are not familar with [systemd journal][systemd-journal].
 
-### Dependencies ###
-    - Linux with systemd-journal
-    - Log4j 1.2
+## Usage ##
+Add the following Maven dependency to your project:
 
-## Building ##
-
-```bash
-make
+```xml
+<dependency>
+	<groupId>de.bwaldvogel</groupId>
+	<artifactId>log4j-systemd-journal-appender</artifactId>
+	<version>1.0-linux-amd64</version>
+</dependency>
 ```
 
-This will build a platform specific JAR file in `build/libs/log4j-systemd-journal-appender-1.0.0-SNAPSHOT.jar`.
+Configure the appender in your `log4j.properties`:
+```
+log4j.appender.journal=de.bwaldvogel.SystemdJournalAppender
+```
 
-*Note: A pre-packaged linux x64 JAR will soon be available via Maven central.*
+### Runtime dependencies ###
+    - Linux with systemd-journal
+    - Log4j 1.2
 
 ## Example ##
 
