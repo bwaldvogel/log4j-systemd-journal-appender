@@ -3,7 +3,7 @@ apply plugin: 'eclipse'
 apply plugin: 'nexus'
 
 // version is platform specific because of JNI
-version = '1.0.1-' + System.properties['os.name'].toLowerCase() + "-" + System.properties['os.arch']
+version = '1.1.0'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -81,6 +81,7 @@ repositories {
 
 dependencies {
     compile group: 'log4j', name: 'log4j', version: log4jVersion
+    compile 'net.java.dev.jna:jna:4.1.0'
 
     testCompile group: 'junit', name: 'junit', version: '4.9'
 }

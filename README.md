@@ -9,7 +9,7 @@ Add the following Maven dependency to your project:
 <dependency>
 	<groupId>de.bwaldvogel</groupId>
 	<artifactId>log4j-systemd-journal-appender</artifactId>
-	<version>1.0.1-linux-amd64</version>
+	<version>1.1.0</version>
 	<scope>runtime</scope>
 </dependency>
 ```

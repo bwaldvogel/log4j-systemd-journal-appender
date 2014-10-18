@@ -1,5 +1,3 @@
 #!/bin/zsh
 
-make clean
-make
-gradle uploadArchives
+gradle clean build uploadArchives

@@ -1,10 +1,9 @@
 package de.bwaldvogel.log4j;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
@@ -38,62 +37,58 @@ public class SystemdJournalAppender extends AppenderSkeleton {
         // #define LOG_INFO 6 - informational
         // #define LOG_DEBUG 7 - debug-level messages
         //
-        if (level == Level.FATAL) {
+        switch (level.toInt()) {
+        case Level.FATAL_INT:
             return 2; // LOG_CRIT
-        } else if (level == Level.ERROR) {
+        case Level.ERROR_INT:
             return 3; // LOG_ERR
-        } else if (level == Level.WARN) {
+        case Level.WARN_INT:
             return 4; // LOG_WARNING
-        } else if (level == Level.INFO) {
+        case Level.INFO_INT:
             return 6; // LOG_INFO
-        } else if (level == Level.DEBUG) {
+        case Level.DEBUG_INT:
+        case Level.TRACE_INT:
             return 7; // LOG_DEBUG
-        } else if (level == Level.TRACE) {
-            return 7; // LOG_DEBUG
-        } else {
+        default:
             throw new IllegalArgumentException("Cannot map log level: " + level);
         }
     }
 
     @Override
     protected void append(LoggingEvent event) {
-        Map<String, String> logData = new HashMap<String, String>();
+        List<Object> args = new ArrayList<>();
 
-        logData.put("MESSAGE", event.getRenderedMessage());
-        logData.put("PRIORITY", String.valueOf(log4jLevelToJournalPriority(event.getLevel())));
+        args.add(event.getRenderedMessage());
 
-        logData.put("THREAD_NAME", event.getThreadName());
-        logData.put("LOG4J_LOGGER", event.getLogger().getName());
+        args.add("PRIORITY=%d");
+        args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
+
+        args.add("THREAD_NAME=%s");
+        args.add(event.getThreadName());
+
+        args.add("LOG4J_LOGGER=%s");
+        args.add(event.getLogger().getName());
 
         if (event.getThrowableStrRep() != null) {
             StringBuilder sb = new StringBuilder();
             for (String stackTrace : event.getThrowableStrRep()) {
                 sb.append(stackTrace).append(LINE_SEPARATOR);
             }
-            logData.put("EXCEPTION", sb.toString());
+            args.add("EXCEPTION=%s");
+            args.add(sb.toString());
         }
 
         Hashtable<?, ?> context = MDC.getContext();
         if (context != null) {
             Enumeration<?> keys = context.keys();
             while (keys.hasMoreElements()) {
-                Object nextElement = keys.nextElement();
-                String key = "LOG4J_MDC_" + nextElement;
-                logData.put(key, context.get(nextElement).toString());
+                Object key = keys.nextElement();
+                String normalizedKey = key.toString().toUpperCase().replaceAll("[^_A-Z0-9]", "_");
+                args.add("LOG4J_MDC_" + normalizedKey + "=%s");
+                args.add(context.get(key).toString());
             }
         }
-        String[] keys = new String[logData.size()];
-        String[] values = new String[logData.size()];
-        int i = 0;
-        for (Entry<String, String> entry : logData.entrySet()) {
-            keys[i] = entry.getKey().toUpperCase().replaceAll("[^_A-Z0-9]", "_");
-            values[i] = entry.getValue();
-            i++;
-        }
 
-        assert logData.size() == keys.length;
-        assert logData.size() == values.length;
-        SystemdJournalAdapter.sendv(logData.size(), keys, values);
+        SystemdJournalLibrary.INSTANCE.sd_journal_send("MESSAGE=%s", args.toArray());
     }
-
 }
