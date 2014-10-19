@@ -105,8 +105,14 @@ You can use the power of [systemd journal][systemd-journal] to filter for intere
 
 `journalctl LOG4J_LOGGER=YourExample THREAD_NAME=main` will only show messages that are logged from the Java main thread via the `YourExample` logger.
 
+## Related Work ##
+
+* [logback-journal][logback-journal]
+	* Systemd Journal appender for Logback
+
 [log4j]: http://logging.apache.org/log4j
 [mdc]: https://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/MDC.html
 [systemd-for-developers]: http://0pointer.de/blog/projects/journal-submit.html
 [systemd-journal]: http://www.freedesktop.org/software/systemd/man/systemd-journald.service.html
 [systemd-journal-fields]: http://www.freedesktop.org/software/systemd/man/systemd.journal-fields.html
+[logback-journal]: https://github.com/gnieh/logback-journal
