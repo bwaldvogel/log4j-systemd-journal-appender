@@ -16,7 +16,6 @@
 package de.bwaldvogel.log4j;
 
 import com.sun.jna.Library;
-import com.sun.jna.Native;
 
 /**
  * Binding to the native journald library.
