@@ -1,4 +1,8 @@
 language: java
+
+install:
+    - sudo apt-get install systemd
+
 jdk:
-      - oraclejdk8
-      - oraclejdk7
+    - oraclejdk8
+    - oraclejdk7
