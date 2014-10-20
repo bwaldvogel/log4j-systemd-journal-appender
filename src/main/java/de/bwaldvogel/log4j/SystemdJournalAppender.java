@@ -10,9 +10,17 @@ import org.apache.log4j.Level;
 import org.apache.log4j.MDC;
 import org.apache.log4j.spi.LoggingEvent;
 
+import com.sun.jna.Native;
+
 public class SystemdJournalAppender extends AppenderSkeleton {
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
+    private final SystemdJournalLibrary journalLibrary;
+
+    public SystemdJournalAppender() {
+        journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd-journal", SystemdJournalLibrary.class);
+    }
 
     @Override
     public void close() {
@@ -89,6 +97,6 @@ public class SystemdJournalAppender extends AppenderSkeleton {
             }
         }
 
-        SystemdJournalLibrary.INSTANCE.sd_journal_send("MESSAGE=%s", args.toArray());
+        journalLibrary.sd_journal_send("MESSAGE=%s", args.toArray());
     }
 }
