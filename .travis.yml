@@ -6,3 +6,6 @@ jdk:
 
 env:
     - TERM=dumb
+
+script:
+    - gradle assemble
