@@ -2,7 +2,6 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'nexus'
 
-// version is platform specific because of JNI
 version = '1.1.0'
 
 sourceCompatibility = 1.7
