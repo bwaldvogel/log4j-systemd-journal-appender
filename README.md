@@ -1,57 +1,64 @@
 [![Build Status](https://travis-ci.org/bwaldvogel/log4j-systemd-journal-appender.png?branch=master)](https://travis-ci.org/bwaldvogel/log4j-systemd-journal-appender)
 
-[Log4j][log4j] appender that logs event meta data such as the timestamp, the logger name, the exception stacktrace, [mapped diagnostic contexts (MDC)][mdc] or the Java thread name to [fields][systemd-journal-fields] in [systemd journal][systemd-journal] (aka "the Journal") .
+[Log4j][log4j] appender that logs event meta data such as the timestamp, the logger name, the exception stacktrace, [ThreadContext (aka MDC)][thread-context] or the Java thread name to [fields][systemd-journal-fields] in [systemd journal][systemd-journal] (aka "the Journal") .
 
 Read Lennart Poettering's blog post [systemd for Developers III][systemd-for-developers] if you are not familar with [systemd journal][systemd-journal].
 
-## Usage ##
+## Usage with Log4j 2.x ##
 Add the following Maven dependency to your project:
 
 ```xml
 <dependency>
 	<groupId>de.bwaldvogel</groupId>
 	<artifactId>log4j-systemd-journal-appender</artifactId>
-	<version>1.1.1</version>
+	<version>2.0.0</version>
 	<scope>runtime</scope>
 </dependency>
 ```
 
-Configure the appender in your `log4j.properties`:
-```
-log4j.appender.journal=de.bwaldvogel.SystemdJournalAppender
-```
+## Usage with Log4j 1.x ##
+
+See the `1.x` branch of this project.
 
 ### Runtime dependencies ###
     - Linux with systemd-journal
-    - Log4j 1.2
+    - Log4j 2.x
 
 ## Example ##
 
-### `log4j.properties`
-```
-log4j.rootLogger=INFO, journal, console
-
-log4j.appender.journal=de.bwaldvogel.SystemdJournalAppender
-
-log4j.appender.console=org.apache.log4j.ConsoleAppender
-log4j.appender.console.layout=org.apache.log4j.PatternLayout
-log4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%.20c] %m%n
+### `log4j2.xml`
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" packages="de.bwaldvogel.log4j">
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </Console>
+        <SystemdJournal name="journal" />
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="journal" />
+        </Root>
+    </Loggers>
+</Configuration>
 ```
 
 This will tell Log4j to log to [systemd journal][systemd-journal] as well as to stdout (console).
-Note that a layout is not set for the `SystemdJournalAppender` and would be ignored if given.
+Note that a layout is not set for `SystemdJournal`.
 This is because meta data of a log event such as the timestamp, the logger name or the Java thread name are mapped to [systemd-journal fields][systemd-journal-fields] and need not be rendered into a string that loses all the semantic information.
 
 ### `YourExample.java`
 ```java
-import org.apache.log4j.*;
+import org.apache.logging.log4j.*;
 
 class YourExample {
 
-    private static Logger logger = Logger.getLogger(YourExample.class);
+    private static Logger logger = LogManager.getLogger(YourExample.class);
 
     public static void main(String[] args) {
-        MDC.put("MY_KEY", "some value");
+        ThreadContext.put("MY_KEY", "some value");
         logger.info("this is an example");
     }
 }
@@ -92,14 +99,14 @@ Mo 2014-10-13 21:26:00.873732 CEST [s=c25294…;i=470;b=ea0fe2…;m=14612…;t=5
     _EXE=/opt/oracle-jdk-bin-1.7.0.65/bin/java
     MESSAGE=this is an example
     THREAD_NAME=main
-    LOG4J_MDC_MY_KEY=some value
+    THREAD_CONTEXT_MY_KEY=some value
     LOG4J_LOGGER=YourExample
     _PID=2370
     _CMDLINE=/opt/oracle-jdk-bin-1.7.0.65/bin/java …
     _SOURCE_REALTIME_TIMESTAMP=1413228360873732
 ```
 
-Note that the [MDC][mdc] key-value pair `{"MY_KEY": "some value"}` is automatically added as field with prefix `LOG4J_MDC`.
+Note that the [ThreadContext][thread-context] key-value pair `{"MY_KEY": "some value"}` is automatically added as field with prefix `THREAD_CONTEXT`.
 
 You can use the power of [systemd journal][systemd-journal] to filter for interesting messages. Example:
 
@@ -110,8 +117,8 @@ You can use the power of [systemd journal][systemd-journal] to filter for intere
 * [logback-journal][logback-journal]
 	* Systemd Journal appender for Logback
 
-[log4j]: http://logging.apache.org/log4j
-[mdc]: https://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/MDC.html
+[log4j]: http://logging.apache.org/log4j/2.x/
+[thread-context]: http://logging.apache.org/log4j/2.x/manual/thread-context.html
 [systemd-for-developers]: http://0pointer.de/blog/projects/journal-submit.html
 [systemd-journal]: http://www.freedesktop.org/software/systemd/man/systemd-journald.service.html
 [systemd-journal-fields]: http://www.freedesktop.org/software/systemd/man/systemd.journal-fields.html

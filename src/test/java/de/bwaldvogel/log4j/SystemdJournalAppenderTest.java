@@ -1,39 +1,18 @@
 package de.bwaldvogel.log4j;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.MDC;
-import org.junit.AfterClass;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SystemdJournalAppenderTest {
 
-    private static final Logger LOGGER = Logger.getLogger(SystemdJournalAppenderTest.class);
-
-    private static final String APPENDER_NAME = "journaldAppender";
-
-    @BeforeClass
-    public static void setUpJournaldAppender() {
-        SystemdJournalAppender journaldAppender = new SystemdJournalAppender();
-        journaldAppender.setName(APPENDER_NAME);
-        journaldAppender.setThreshold(Level.TRACE);
-        Logger.getRootLogger().addAppender(journaldAppender);
-    }
-
-    @AfterClass
-    public static void closeJournaldAppender() {
-        Appender appender = Logger.getRootLogger().getAppender(APPENDER_NAME);
-        if (appender != null) {
-            appender.close();
-        }
-    }
+    private static final Logger LOGGER = LogManager.getLogger(SystemdJournalAppenderTest.class.getName());
 
     @Before
     public void clearMdc() {
-        MDC.clear();
+        ThreadContext.clearAll();
     }
 
     @Test
@@ -52,8 +31,8 @@ public class SystemdJournalAppenderTest {
 
     @Test
     public void testMessageWithMDC() {
-        MDC.put("some key1", "some value %d");
-        MDC.put("some key2", "some other value with unicode: →←üöß");
+        ThreadContext.put("some key1", "some value %d");
+        ThreadContext.put("some key2", "some other value with unicode: →←üöß");
         LOGGER.info("this is a test message with a MDC");
     }
 

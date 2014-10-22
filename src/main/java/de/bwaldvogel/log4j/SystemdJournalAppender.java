@@ -1,35 +1,48 @@
 package de.bwaldvogel.log4j;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.Level;
-import org.apache.log4j.MDC;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginConfiguration;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
+import org.apache.logging.log4j.core.config.plugins.PluginFactory;
+import org.apache.logging.log4j.core.util.Booleans;
 
 import com.sun.jna.Native;
 
-public class SystemdJournalAppender extends AppenderSkeleton {
-
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+@Plugin(name = "SystemdJournal", category = "Core", elementType = "appender", printObject = true)
+public class SystemdJournalAppender extends AbstractAppender {
 
     private final SystemdJournalLibrary journalLibrary;
 
-    public SystemdJournalAppender() {
+    private SystemdJournalAppender(final String name, final Filter filter, final boolean ignoreExceptions) {
+        super(name, filter, null, ignoreExceptions);
         journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd-journal", SystemdJournalLibrary.class);
     }
 
-    @Override
-    public void close() {
-        // ignore
-    }
+    @PluginFactory
+    public static SystemdJournalAppender createAppender(@PluginAttribute("name") final String name,
+            @PluginAttribute("ignoreExceptions") final String ignore, @PluginElement("Filter") final Filter filter,
+            @PluginConfiguration final Configuration config) {
+        final boolean ignoreExceptions = Booleans.parseBoolean(ignore, true);
 
-    @Override
-    public boolean requiresLayout() {
-        return false;
+        if (name == null) {
+            LOGGER.error("No name provided for FileAppender");
+            return null;
+        }
+
+        return new SystemdJournalAppender(name, filter, ignoreExceptions);
     }
 
     private int log4jLevelToJournalPriority(Level level) {
@@ -45,17 +58,17 @@ public class SystemdJournalAppender extends AppenderSkeleton {
         // #define LOG_INFO 6 - informational
         // #define LOG_DEBUG 7 - debug-level messages
         //
-        switch (level.toInt()) {
-        case Level.FATAL_INT:
+        switch (level.getStandardLevel()) {
+        case FATAL:
             return 2; // LOG_CRIT
-        case Level.ERROR_INT:
+        case ERROR:
             return 3; // LOG_ERR
-        case Level.WARN_INT:
+        case WARN:
             return 4; // LOG_WARNING
-        case Level.INFO_INT:
+        case INFO:
             return 6; // LOG_INFO
-        case Level.DEBUG_INT:
-        case Level.TRACE_INT:
+        case DEBUG:
+        case TRACE:
             return 7; // LOG_DEBUG
         default:
             throw new IllegalArgumentException("Cannot map log level: " + level);
@@ -63,10 +76,10 @@ public class SystemdJournalAppender extends AppenderSkeleton {
     }
 
     @Override
-    protected void append(LoggingEvent event) {
+    public void append(LogEvent event) {
         List<Object> args = new ArrayList<>();
 
-        args.add(event.getRenderedMessage());
+        args.add(event.getMessage().getFormattedMessage());
 
         args.add("PRIORITY=%d");
         args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
@@ -75,25 +88,22 @@ public class SystemdJournalAppender extends AppenderSkeleton {
         args.add(event.getThreadName());
 
         args.add("LOG4J_LOGGER=%s");
-        args.add(event.getLogger().getName());
+        args.add(event.getLoggerName());
 
-        if (event.getThrowableStrRep() != null) {
-            StringBuilder sb = new StringBuilder();
-            for (String stackTrace : event.getThrowableStrRep()) {
-                sb.append(stackTrace).append(LINE_SEPARATOR);
-            }
+        if (event.getThrown() != null) {
+            StringWriter stacktrace = new StringWriter();
+            event.getThrown().printStackTrace(new PrintWriter(stacktrace));
             args.add("EXCEPTION=%s");
-            args.add(sb.toString());
+            args.add(stacktrace.toString());
         }
 
-        Hashtable<?, ?> context = MDC.getContext();
+        Map<String, String> context = event.getContextMap();
         if (context != null) {
-            Enumeration<?> keys = context.keys();
-            while (keys.hasMoreElements()) {
-                Object key = keys.nextElement();
-                String normalizedKey = key.toString().toUpperCase().replaceAll("[^_A-Z0-9]", "_");
-                args.add("LOG4J_MDC_" + normalizedKey + "=%s");
-                args.add(context.get(key).toString());
+            for (Entry<String, String> entry : context.entrySet()) {
+                String key = entry.getKey();
+                String normalizedKey = key.toUpperCase().replaceAll("[^_A-Z0-9]", "_");
+                args.add("THREAD_CONTEXT_" + normalizedKey + "=%s");
+                args.add(entry.getValue());
             }
         }
 
