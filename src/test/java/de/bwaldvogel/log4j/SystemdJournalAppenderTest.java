@@ -46,6 +46,11 @@ public class SystemdJournalAppenderTest {
     }
 
     @Test
+    public void testMessageWithUnicode() {
+        LOGGER.info("this is a test message with unicode: →←üöß");
+    }
+
+    @Test
     public void testMessageWithMDC() {
         MDC.put("some key1", "some value %d");
         MDC.put("some key2", "some other value with unicode: →←üöß");
