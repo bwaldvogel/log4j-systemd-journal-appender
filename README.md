@@ -18,7 +18,7 @@ Add the following Maven dependency to your project:
 
 ## Usage with Log4j 1.x ##
 
-See the `1.x` branch of this project.
+See the [`1.x` branch][1.x-branch] of this project.
 
 ### Runtime dependencies ###
     - Linux with systemd-journal
@@ -117,6 +117,7 @@ You can use the power of [systemd journal][systemd-journal] to filter for intere
 * [logback-journal][logback-journal]
 	* Systemd Journal appender for Logback
 
+[1.x-branch]: https://github.com/bwaldvogel/log4j-systemd-journal-appender/tree/1.x
 [log4j]: http://logging.apache.org/log4j/2.x/
 [thread-context]: http://logging.apache.org/log4j/2.x/manual/thread-context.html
 [systemd-for-developers]: http://0pointer.de/blog/projects/journal-submit.html
