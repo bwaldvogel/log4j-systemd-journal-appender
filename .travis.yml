@@ -9,3 +9,7 @@ env:
 
 script:
     - gradle assemble
+
+branches:
+    - master
+    - 1.x
