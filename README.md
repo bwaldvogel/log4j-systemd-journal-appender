@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/bwaldvogel/log4j-systemd-journal-appender.png?branch=master)](https://travis-ci.org/bwaldvogel/log4j-systemd-journal-appender)
+[![Build Status](https://travis-ci.org/bwaldvogel/log4j-systemd-journal-appender.png?branch=1.x)](https://travis-ci.org/bwaldvogel/log4j-systemd-journal-appender)
 
 [Log4j][log4j] appender that logs event meta data such as the timestamp, the logger name, the exception stacktrace, [mapped diagnostic contexts (MDC)][mdc] or the Java thread name to [fields][systemd-journal-fields] in [systemd journal][systemd-journal] (aka "the Journal") .
 
