@@ -26,23 +26,62 @@ public class SystemdJournalAppender extends AbstractAppender {
 
     private final SystemdJournalLibrary journalLibrary;
 
-    private SystemdJournalAppender(final String name, final Filter filter, final boolean ignoreExceptions) {
+    private final boolean logStacktrace;
+
+    private final boolean logSource;
+
+    private final boolean logThreadName;
+
+    private final boolean logLoggerName;
+
+    private final boolean logThreadContext;
+
+    private final String threadContextPrefix;
+
+    SystemdJournalAppender(final String name, final Filter filter, final boolean ignoreExceptions,
+            SystemdJournalLibrary journalLibrary, boolean logSource, boolean logStacktrace, boolean logThreadName,
+            boolean logLoggerName, boolean logThreadContext, String threadContextPrefix) {
         super(name, filter, null, ignoreExceptions);
-        journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd-journal", SystemdJournalLibrary.class);
+        this.journalLibrary = journalLibrary;
+        this.logSource = logSource;
+        this.logStacktrace = logStacktrace;
+        this.logThreadName = logThreadName;
+        this.logLoggerName = logLoggerName;
+        this.logThreadContext = logThreadContext;
+        if (threadContextPrefix == null) {
+            this.threadContextPrefix = "THREAD_CONTEXT_";
+        } else {
+            this.threadContextPrefix = normalizeKey(threadContextPrefix);
+        }
     }
 
     @PluginFactory
     public static SystemdJournalAppender createAppender(@PluginAttribute("name") final String name,
-            @PluginAttribute("ignoreExceptions") final String ignore, @PluginElement("Filter") final Filter filter,
-            @PluginConfiguration final Configuration config) {
-        final boolean ignoreExceptions = Booleans.parseBoolean(ignore, true);
+            @PluginAttribute("ignoreExceptions") final String ignoreExceptionsString,
+            @PluginAttribute("logSource") final String logSourceString,
+            @PluginAttribute("logStacktrace") final String logStacktraceString,
+            @PluginAttribute("logLoggerName") final String logLoggerNameString,
+            @PluginAttribute("logThreadName") final String logThreadNameString,
+            @PluginAttribute("logThreadContext") final String logThreadContextString,
+            @PluginAttribute("threadContextPrefix") final String threadContextPrefix,
+            @PluginElement("Filter") final Filter filter, @PluginConfiguration final Configuration config) {
+        final boolean ignoreExceptions = Booleans.parseBoolean(ignoreExceptionsString, true);
+        final boolean logSource = Booleans.parseBoolean(logSourceString, false);
+        final boolean logStacktrace = Booleans.parseBoolean(logStacktraceString, true);
+        final boolean logThreadName = Booleans.parseBoolean(logThreadNameString, true);
+        final boolean logLoggerName = Booleans.parseBoolean(logLoggerNameString, true);
+        final boolean logThreadContext = Booleans.parseBoolean(logThreadContextString, true);
 
         if (name == null) {
             LOGGER.error("No name provided for FileAppender");
             return null;
         }
 
-        return new SystemdJournalAppender(name, filter, ignoreExceptions);
+        SystemdJournalLibrary journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd-journal",
+                SystemdJournalLibrary.class);
+
+        return new SystemdJournalAppender(name, filter, ignoreExceptions, journalLibrary, logSource, logStacktrace,
+                logThreadName, logLoggerName, logThreadContext, threadContextPrefix);
     }
 
     private int log4jLevelToJournalPriority(Level level) {
@@ -84,29 +123,52 @@ public class SystemdJournalAppender extends AbstractAppender {
         args.add("PRIORITY=%d");
         args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
 
-        args.add("THREAD_NAME=%s");
-        args.add(event.getThreadName());
+        if (logThreadName) {
+            args.add("THREAD_NAME=%s");
+            args.add(event.getThreadName());
+        }
 
-        args.add("LOG4J_LOGGER=%s");
-        args.add(event.getLoggerName());
+        if (logLoggerName) {
+            args.add("LOG4J_LOGGER=%s");
+            args.add(event.getLoggerName());
+        }
 
-        if (event.getThrown() != null) {
+        if (logStacktrace && event.getThrown() != null) {
             StringWriter stacktrace = new StringWriter();
             event.getThrown().printStackTrace(new PrintWriter(stacktrace));
-            args.add("EXCEPTION=%s");
+            args.add("STACKTRACE=%s");
             args.add(stacktrace.toString());
         }
 
-        Map<String, String> context = event.getContextMap();
-        if (context != null) {
-            for (Entry<String, String> entry : context.entrySet()) {
-                String key = entry.getKey();
-                String normalizedKey = key.toUpperCase().replaceAll("[^_A-Z0-9]", "_");
-                args.add("THREAD_CONTEXT_" + normalizedKey + "=%s");
-                args.add(entry.getValue());
+        if (logSource && event.getSource() != null) {
+            String fileName = event.getSource().getFileName();
+            args.add("CODE_FILE=%s");
+            args.add(fileName);
+
+            String methodName = event.getSource().getMethodName();
+            args.add("CODE_FUNC=%s");
+            args.add(methodName);
+
+            int lineNumber = event.getSource().getLineNumber();
+            args.add("CODE_LINE=%d");
+            args.add(Integer.valueOf(lineNumber));
+        }
+
+        if (logThreadContext) {
+            Map<String, String> context = event.getContextMap();
+            if (context != null) {
+                for (Entry<String, String> entry : context.entrySet()) {
+                    String key = entry.getKey();
+                    args.add(threadContextPrefix + normalizeKey(key) + "=%s");
+                    args.add(entry.getValue());
+                }
             }
         }
 
         journalLibrary.sd_journal_send("MESSAGE=%s", args.toArray());
+    }
+
+    private static String normalizeKey(String key) {
+        return key.toUpperCase().replaceAll("[^_A-Z0-9]", "_");
     }
 }

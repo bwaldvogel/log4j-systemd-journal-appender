@@ -4,7 +4,13 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
         </Console>
-        <SystemdJournal name="Journal"/>
+        <SystemdJournal name="Journal"
+                        logStacktrace="true"
+                        logThreadName="true"
+                        logSource="true"
+                        logLoggerName="true"
+                        logThreadContext="true"
+                        threadContextPrefix="THREAD_CONTEXT_" />
     </Appenders>
     <Loggers>
         <Root level="INFO">

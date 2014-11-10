@@ -1,44 +1,137 @@
 package de.bwaldvogel.log4j;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mock;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.impl.Log4jLogEvent;
+import org.apache.logging.log4j.message.Message;
 import org.junit.Before;
 import org.junit.Test;
 
 public class SystemdJournalAppenderTest {
 
-    private static final Logger LOGGER = LogManager.getLogger(SystemdJournalAppenderTest.class.getName());
+    private SystemdJournalLibrary journalLibrary;
 
     @Before
-    public void clearMdc() {
-        ThreadContext.clearAll();
+    public void prepare() {
+        journalLibrary = mock(SystemdJournalLibrary.class);
     }
 
     @Test
-    public void testMessages() {
-        LOGGER.trace("this is a test message with level TRACE");
-        LOGGER.debug("this is a test message with level DEBUG");
-        LOGGER.info("this is a test message with level INFO");
-        LOGGER.warn("this is a test message with level WARN");
-        LOGGER.error("this is a test message with level ERROR");
+    public void testAppend_Simple() {
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
+                false, false, false, false, false, null);
+
+        Message message = mock(Message.class);
+        when(message.getFormattedMessage()).thenReturn("some message");
+        LogEvent event = new Log4jLogEvent.Builder().setMessage(message).setLevel(Level.INFO).build();
+
+        journalAppender.append(event);
+
+        List<Object> expectedArgs = new ArrayList<>();
+        expectedArgs.add("some message");
+        expectedArgs.add("PRIORITY=%d");
+        expectedArgs.add(6);
+
+        verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
 
     @Test
-    public void testMessageWithUnicode() {
-        LOGGER.info("this is a test message with unicode: →←üöß");
+    public void testAppend_LogSource() {
+
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
+                true, false, false, false, false, null);
+
+        Message message = mock(Message.class);
+        when(message.getFormattedMessage()).thenReturn("some message");
+        LogEvent event = new Log4jLogEvent.Builder() //
+                .setMessage(message)//
+                .setLoggerFqcn(journalAppender.getClass().getName())//
+                .setLevel(Level.INFO).build();
+        event.setIncludeLocation(true);
+
+        journalAppender.append(event);
+
+        List<Object> expectedArgs = new ArrayList<>();
+        expectedArgs.add("some message");
+        expectedArgs.add("PRIORITY=%d");
+        expectedArgs.add(6);
+        expectedArgs.add("CODE_FILE=%s");
+        expectedArgs.add("SystemdJournalAppenderTest.java");
+        expectedArgs.add("CODE_FUNC=%s");
+        expectedArgs.add("testAppend_LogSource");
+        expectedArgs.add("CODE_LINE=%d");
+        expectedArgs.add(Integer.valueOf(61));
+
+        verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
 
     @Test
-    public void testMessageWithMDC() {
-        ThreadContext.put("some key1", "some value %d");
-        ThreadContext.put("some key2", "some other value with unicode: →←üöß");
-        LOGGER.info("this is a test message with a MDC");
+    public void testAppend_DoNotLogException() {
+
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
+                false, false, false, false, false, null);
+
+        Message message = mock(Message.class);
+        when(message.getFormattedMessage()).thenReturn("some message");
+
+        LogEvent event = new Log4jLogEvent.Builder() //
+                .setMessage(message)//
+                .setLoggerFqcn(journalAppender.getClass().getName())//
+                .setThrown(new Throwable()) //
+                .setLevel(Level.INFO).build();
+        event.setIncludeLocation(true);
+
+        journalAppender.append(event);
+
+        List<Object> expectedArgs = new ArrayList<>();
+        expectedArgs.add("some message");
+        expectedArgs.add("PRIORITY=%d");
+        expectedArgs.add(6);
+
+        verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
 
     @Test
-    public void testMessageWithStacktrace() {
-        LOGGER.info("this is a test message with an exception", new RuntimeException("some exception"));
-    }
+    public void testAppend_ThreadAndContext() {
 
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
+                false, false, true, true, true, null);
+
+        Message message = mock(Message.class);
+        when(message.getFormattedMessage()).thenReturn("some message");
+
+        Map<String, String> contextMap = new LinkedHashMap<>();
+        LogEvent event = mock(LogEvent.class);
+        when(event.getMessage()).thenReturn(message);
+        when(event.getLoggerName()).thenReturn("some logger");
+        when(event.getLevel()).thenReturn(Level.INFO);
+        when(event.getThreadName()).thenReturn("the thread");
+        when(event.getContextMap()).thenReturn(contextMap);
+
+        contextMap.put("foo", "bar");
+
+        journalAppender.append(event);
+
+        List<Object> expectedArgs = new ArrayList<>();
+        expectedArgs.add("some message");
+        expectedArgs.add("PRIORITY=%d");
+        expectedArgs.add(6);
+        expectedArgs.add("THREAD_NAME=%s");
+        expectedArgs.add("the thread");
+        expectedArgs.add("LOG4J_LOGGER=%s");
+        expectedArgs.add("some logger");
+        expectedArgs.add("THREAD_CONTEXT_FOO=%s");
+        expectedArgs.add("bar");
+
+        verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
+    }
 }
