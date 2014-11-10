@@ -25,14 +25,13 @@ log4j.appender.journal=de.bwaldvogel.SystemdJournalAppender
 
 +The appender can be configured with the following properties
 
-       Property name         | Default           | Type    | Description
-       --------------------- | ----------------- | ------- | -----------
-       `logSource`           | false             | boolean | Determines whether the log locations are logged. Note that there is a performance overhead when switched on. The data is logged in standard systemd journal fields `CODE_FILE`, `CODE_LINE` and `CODE_FUNC`.
-       `logStacktrace`       | true              | boolean | Determines whether the full exception stack trace is logged. This data is logged in the user field `STACKTRACE`.
-       `logThreadName`       | true              | boolean | Determines whether the thread name is logged. This data is logged in the user field `THREAD_NAME`.
-       `logLoggerName`       | true              | boolean | Determines whether the logger name is logged. This data is logged in the user field `LOG4J_LOGGER`.
-       `logThreadContext`    | true              | boolean | Determines whether the [thread context][thread-context] is logged. Each key/value pair is logged as user field with the `threadContextPrefix` prefix.
-       `threadContextPrefix` | `THREAD_CONTEXT_` | String  | Determines how [thread context][thread-context] keys should be prefixed when `logThreadContext` is set to true. Note that keys need to match the regex pattern `[A-Z0-9_]+` and are normalized otherwise.
+       Property name   | Default      | Type    | Description
+       --------------- | ------------ | ------- | -----------
+       `logStacktrace` | true         | boolean | Determines whether the full exception stack trace is logged. This data is logged in the user field `STACKTRACE`.
+       `logThreadName` | true         | boolean | Determines whether the thread name is logged. This data is logged in the user field `THREAD_NAME`.
+       `logLoggerName` | true         | boolean | Determines whether the logger name is logged. This data is logged in the user field `LOG4J_LOGGER`.
+       `logMdc`        | true         | boolean | Determines whether the [thread context][thread-context] is logged. Each key/value pair is logged as user field with the `mdcPrefix` prefix.
+       `mdcPrefix`     | `LOG4J_MDC_` | String  | Determines how [MDC][mdc] keys should be prefixed when `logMdc` is set to true. Note that keys need to match the regex pattern `[A-Z0-9_]+` and are normalized otherwise.
 
 ### Runtime dependencies ###
     - Linux with systemd-journal
