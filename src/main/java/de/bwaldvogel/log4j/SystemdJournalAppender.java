@@ -165,6 +165,8 @@ public class SystemdJournalAppender extends AbstractAppender {
             }
         }
 
+        args.add(null); // null terminated
+
         journalLibrary.sd_journal_send("MESSAGE=%s", args.toArray());
     }
 

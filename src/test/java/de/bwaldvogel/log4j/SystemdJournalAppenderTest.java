@@ -40,6 +40,7 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add("some message");
         expectedArgs.add("PRIORITY=%d");
         expectedArgs.add(6);
+        expectedArgs.add(null);
 
         verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
@@ -69,7 +70,8 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add("CODE_FUNC=%s");
         expectedArgs.add("testAppend_LogSource");
         expectedArgs.add("CODE_LINE=%d");
-        expectedArgs.add(Integer.valueOf(61));
+        expectedArgs.add(Integer.valueOf(62));
+        expectedArgs.add(null);
 
         verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
@@ -96,6 +98,7 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add("some message");
         expectedArgs.add("PRIORITY=%d");
         expectedArgs.add(6);
+        expectedArgs.add(null);
 
         verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
@@ -131,6 +134,7 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add("some logger");
         expectedArgs.add("THREAD_CONTEXT_FOO=%s");
         expectedArgs.add("bar");
+        expectedArgs.add(null);
 
         verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
