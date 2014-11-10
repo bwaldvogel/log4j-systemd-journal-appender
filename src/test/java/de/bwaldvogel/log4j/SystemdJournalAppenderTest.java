@@ -1,65 +1,92 @@
 package de.bwaldvogel.log4j;
 
-import org.apache.log4j.Appender;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.mock;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.MDC;
-import org.junit.AfterClass;
+import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SystemdJournalAppenderTest {
 
-    private static final Logger LOGGER = Logger.getLogger(SystemdJournalAppenderTest.class);
-
-    private static final String APPENDER_NAME = "journaldAppender";
-
-    @BeforeClass
-    public static void setUpJournaldAppender() {
-        SystemdJournalAppender journaldAppender = new SystemdJournalAppender();
-        journaldAppender.setName(APPENDER_NAME);
-        journaldAppender.setThreshold(Level.TRACE);
-        Logger.getRootLogger().addAppender(journaldAppender);
-    }
-
-    @AfterClass
-    public static void closeJournaldAppender() {
-        Appender appender = Logger.getRootLogger().getAppender(APPENDER_NAME);
-        if (appender != null) {
-            appender.close();
-        }
-    }
+    private SystemdJournalLibrary journalLibrary;
 
     @Before
-    public void clearMdc() {
-        MDC.clear();
+    public void prepare() {
+        journalLibrary = mock(SystemdJournalLibrary.class);
     }
 
     @Test
-    public void testMessages() {
-        LOGGER.trace("this is a test message with level TRACE");
-        LOGGER.debug("this is a test message with level DEBUG");
-        LOGGER.info("this is a test message with level INFO");
-        LOGGER.warn("this is a test message with level WARN");
-        LOGGER.error("this is a test message with level ERROR");
+    public void testAppend_Simple() {
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender(journalLibrary);
+        journalAppender.setLogThreadName(false);
+        journalAppender.setLogLoggerName(false);
+
+        Logger logger = Logger.getLogger(SystemdJournalAppenderTest.class);
+        LoggingEvent event = new LoggingEvent("foo", logger, Level.INFO, "some message", null);
+
+        journalAppender.append(event);
+
+        List<Object> expectedArgs = new ArrayList<>();
+        expectedArgs.add("some message");
+        expectedArgs.add("PRIORITY=%d");
+        expectedArgs.add(6);
+
+        verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
 
     @Test
-    public void testMessageWithUnicode() {
-        LOGGER.info("this is a test message with unicode: →←üöß");
+    public void testAppend_DoNotLogException() {
+
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender(journalLibrary);
+        journalAppender.setLogStacktrace(false);
+        journalAppender.setLogThreadName(false);
+        journalAppender.setLogLoggerName(false);
+
+        Logger logger = Logger.getLogger(SystemdJournalAppenderTest.class);
+        LoggingEvent event = new LoggingEvent("foo", logger, Level.INFO, "some message", new Throwable());
+
+        journalAppender.append(event);
+
+        List<Object> expectedArgs = new ArrayList<>();
+        expectedArgs.add("some message");
+        expectedArgs.add("PRIORITY=%d");
+        expectedArgs.add(6);
+
+        verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
 
     @Test
-    public void testMessageWithMDC() {
-        MDC.put("some key1", "some value %d");
-        MDC.put("some key2", "some other value with unicode: →←üöß");
-        LOGGER.info("this is a test message with a MDC");
-    }
+    public void testAppend_ThreadAndMdc() {
 
-    @Test
-    public void testMessageWithStacktrace() {
-        LOGGER.info("this is a test message with an exception", new RuntimeException("some exception"));
-    }
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender( journalLibrary);
+        journalAppender.setLogThreadName(true);
+        journalAppender.setLogLoggerName(true);
+        journalAppender.setLogMdc(true);
+        journalAppender.setMdcPrefix("");
 
+        Logger logger = Logger.getLogger(SystemdJournalAppenderTest.class);
+        LoggingEvent event = new LoggingEvent("foo", logger, Level.INFO, "some message", null);
+        event.setProperty("foo", "bar");
+
+        journalAppender.append(event);
+
+        List<Object> expectedArgs = new ArrayList<>();
+        expectedArgs.add("some message");
+        expectedArgs.add("PRIORITY=%d");
+        expectedArgs.add(6);
+        expectedArgs.add("THREAD_NAME=%s");
+        expectedArgs.add(Thread.currentThread().getName());
+        expectedArgs.add("LOG4J_LOGGER=%s");
+        expectedArgs.add(logger.getName());
+        expectedArgs.add("FOO=%s");
+        expectedArgs.add("bar");
+
+        verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
+    }
 }

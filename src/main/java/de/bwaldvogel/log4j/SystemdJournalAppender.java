@@ -1,13 +1,12 @@
 package de.bwaldvogel.log4j;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
-import org.apache.log4j.MDC;
 import org.apache.log4j.spi.LoggingEvent;
 
 import com.sun.jna.Native;
@@ -18,8 +17,22 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     private final SystemdJournalLibrary journalLibrary;
 
+    private boolean logStacktrace = true;
+
+    private boolean logThreadName = true;
+
+    private boolean logLoggerName = true;
+
+    private boolean logMdc = true;
+
+    private String mdcPrefix = "LOG4J_MDC_";
+
     public SystemdJournalAppender() {
         journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd-journal", SystemdJournalLibrary.class);
+    }
+
+    SystemdJournalAppender(SystemdJournalLibrary journalLibrary) {
+        this.journalLibrary = journalLibrary;
     }
 
     @Override
@@ -71,32 +84,58 @@ public class SystemdJournalAppender extends AppenderSkeleton {
         args.add("PRIORITY=%d");
         args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
 
-        args.add("THREAD_NAME=%s");
-        args.add(event.getThreadName());
+        if (logThreadName) {
+            args.add("THREAD_NAME=%s");
+            args.add(event.getThreadName());
+        }
 
-        args.add("LOG4J_LOGGER=%s");
-        args.add(event.getLogger().getName());
+        if (logLoggerName) {
+            args.add("LOG4J_LOGGER=%s");
+            args.add(event.getLogger().getName());
+        }
 
-        if (event.getThrowableStrRep() != null) {
+        if (logStacktrace && event.getThrowableStrRep() != null) {
             StringBuilder sb = new StringBuilder();
             for (String stackTrace : event.getThrowableStrRep()) {
                 sb.append(stackTrace).append(LINE_SEPARATOR);
             }
-            args.add("EXCEPTION=%s");
+            args.add("STACKTRACE=%s");
             args.add(sb.toString());
         }
 
-        Hashtable<?, ?> context = MDC.getContext();
-        if (context != null) {
-            Enumeration<?> keys = context.keys();
-            while (keys.hasMoreElements()) {
-                Object key = keys.nextElement();
-                String normalizedKey = key.toString().toUpperCase().replaceAll("[^_A-Z0-9]", "_");
-                args.add("LOG4J_MDC_" + normalizedKey + "=%s");
-                args.add(context.get(key).toString());
+        Map<?, ?> properties = event.getProperties();
+        if (logMdc && properties != null) {
+            for (Entry<?, ?> entry : properties.entrySet()) {
+                Object key = entry.getKey();
+                args.add(mdcPrefix + normalizeKey(key) + "=%s");
+                args.add(entry.getValue().toString());
             }
         }
 
         journalLibrary.sd_journal_send("MESSAGE=%s", args.toArray());
+    }
+
+    private static String normalizeKey(Object key) {
+        return key.toString().toUpperCase().replaceAll("[^_A-Z0-9]", "_");
+    }
+
+    public void setLogStacktrace(boolean logStacktrace) {
+        this.logStacktrace = logStacktrace;
+    }
+
+    public void setLogThreadName(boolean logThreadName) {
+        this.logThreadName = logThreadName;
+    }
+
+    public void setLogLoggerName(boolean logLoggerName) {
+        this.logLoggerName = logLoggerName;
+    }
+
+    public void setLogMdc(boolean logMdc) {
+        this.logMdc = logMdc;
+    }
+
+    public void setMdcPrefix(String mdcPrefix) {
+        this.mdcPrefix = normalizeKey(mdcPrefix);
     }
 }
