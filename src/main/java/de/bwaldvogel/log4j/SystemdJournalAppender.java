@@ -112,6 +112,8 @@ public class SystemdJournalAppender extends AppenderSkeleton {
             }
         }
 
+        args.add(null);
+
         journalLibrary.sd_journal_send("MESSAGE=%s", args.toArray());
     }
 

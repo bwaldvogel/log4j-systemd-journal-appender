@@ -36,6 +36,7 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add("some message");
         expectedArgs.add("PRIORITY=%d");
         expectedArgs.add(6);
+        expectedArgs.add(null);
 
         verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
@@ -57,6 +58,7 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add("some message");
         expectedArgs.add("PRIORITY=%d");
         expectedArgs.add(6);
+        expectedArgs.add(null);
 
         verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
@@ -64,7 +66,7 @@ public class SystemdJournalAppenderTest {
     @Test
     public void testAppend_ThreadAndMdc() {
 
-        SystemdJournalAppender journalAppender = new SystemdJournalAppender( journalLibrary);
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender(journalLibrary);
         journalAppender.setLogThreadName(true);
         journalAppender.setLogLoggerName(true);
         journalAppender.setLogMdc(true);
@@ -86,6 +88,7 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add(logger.getName());
         expectedArgs.add("FOO=%s");
         expectedArgs.add("bar");
+        expectedArgs.add(null);
 
         verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
     }
