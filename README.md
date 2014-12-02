@@ -23,7 +23,7 @@ log4j.appender.journal=de.bwaldvogel.SystemdJournalAppender
 
 ## Configuration ##
 
-+The appender can be configured with the following properties
+The appender can be configured with the following properties
 
        Property name   | Default      | Type    | Description
        --------------- | ------------ | ------- | -----------
