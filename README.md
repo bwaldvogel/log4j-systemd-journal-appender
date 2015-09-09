@@ -32,6 +32,7 @@ The appender can be configured with the following properties
        `logLoggerName` | true         | boolean | Determines whether the logger name is logged. This data is logged in the user field `LOG4J_LOGGER`.
        `logMdc`        | true         | boolean | Determines whether the [thread context][thread-context] is logged. Each key/value pair is logged as user field with the `mdcPrefix` prefix.
        `mdcPrefix`     | `LOG4J_MDC_` | String  | Determines how [MDC][mdc] keys should be prefixed when `logMdc` is set to true. Note that keys need to match the regex pattern `[A-Z0-9_]+` and are normalized otherwise.
+       `syslogIdentifier`| null       | String  | This data is logged in the user field `SYSLOG_IDENTIFIER`.  If this is not set, the underlying system will use the command name (usually `java`) instead.
 
 ### Runtime dependencies ###
     - Linux with systemd-journal

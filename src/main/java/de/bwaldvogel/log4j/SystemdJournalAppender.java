@@ -27,6 +27,8 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     private String mdcPrefix = "LOG4J_MDC_";
 
+    private String syslogIdentifier;
+
     public SystemdJournalAppender() {
         journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd-journal", SystemdJournalLibrary.class);
     }
@@ -84,6 +86,11 @@ public class SystemdJournalAppender extends AppenderSkeleton {
         args.add("PRIORITY=%d");
         args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
 
+        if (syslogIdentifier != null && !syslogIdentifier.isEmpty()) {
+            args.add("SYSLOG_IDENTIFIER=%s");
+            args.add(syslogIdentifier);
+        }
+
         if (logThreadName) {
             args.add("THREAD_NAME=%s");
             args.add(event.getThreadName());
@@ -139,5 +146,13 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     public void setMdcPrefix(String mdcPrefix) {
         this.mdcPrefix = normalizeKey(mdcPrefix);
+    }
+
+    public String getSyslogIdentifier() {
+        return syslogIdentifier;
+    }
+
+    public void setSyslogIdentifier(String syslogIdentifier) {
+        this.syslogIdentifier = syslogIdentifier;
     }
 }
