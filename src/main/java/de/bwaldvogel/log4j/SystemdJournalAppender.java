@@ -30,7 +30,7 @@ public class SystemdJournalAppender extends AppenderSkeleton {
     private String syslogIdentifier;
 
     public SystemdJournalAppender() {
-        journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd-journal", SystemdJournalLibrary.class);
+        journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd", SystemdJournalLibrary.class);
     }
 
     SystemdJournalAppender(SystemdJournalLibrary journalLibrary) {
