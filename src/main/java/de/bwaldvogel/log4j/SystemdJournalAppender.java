@@ -77,7 +77,7 @@ public class SystemdJournalAppender extends AbstractAppender {
             return null;
         }
 
-        SystemdJournalLibrary journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd-journal",
+        SystemdJournalLibrary journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd",
                 SystemdJournalLibrary.class);
 
         return new SystemdJournalAppender(name, filter, ignoreExceptions, journalLibrary, logSource, logStacktrace,
