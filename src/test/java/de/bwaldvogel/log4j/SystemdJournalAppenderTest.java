@@ -120,7 +120,7 @@ public class SystemdJournalAppenderTest {
         when(event.getThreadName()).thenReturn("the thread");
         when(event.getContextMap()).thenReturn(contextMap);
 
-        contextMap.put("foo", "bar");
+        contextMap.put("foo%s$1%d", "bar");
 
         journalAppender.append(event);
 
@@ -132,7 +132,7 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add("the thread");
         expectedArgs.add("LOG4J_LOGGER=%s");
         expectedArgs.add("some logger");
-        expectedArgs.add("THREAD_CONTEXT_FOO=%s");
+        expectedArgs.add("THREAD_CONTEXT_FOO_S_1_D=%s");
         expectedArgs.add("bar");
         expectedArgs.add(null);
 

@@ -37,6 +37,13 @@ public class SystemdJournalAppenderIntegrationTest {
     }
 
     @Test
+    public void testMessageWithPlaceholders() {
+        ThreadContext.put("some key1%s", "%1$");
+        ThreadContext.put("%1$", "%1$");
+        LOGGER.info("this is a test message with special placeholder characters: %1$");
+    }
+
+    @Test
     public void testMessageWithStacktrace() {
         LOGGER.info("this is a test message with an exception", new RuntimeException("some exception"));
     }
