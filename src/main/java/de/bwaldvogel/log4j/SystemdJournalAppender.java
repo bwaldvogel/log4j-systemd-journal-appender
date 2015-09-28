@@ -24,6 +24,8 @@ import com.sun.jna.Native;
 @Plugin(name = "SystemdJournal", category = "Core", elementType = "appender", printObject = true)
 public class SystemdJournalAppender extends AbstractAppender {
 
+    private static final long serialVersionUID = 1L;
+
     private final SystemdJournalLibrary journalLibrary;
 
     private final boolean logStacktrace;
@@ -38,9 +40,11 @@ public class SystemdJournalAppender extends AbstractAppender {
 
     private final String threadContextPrefix;
 
+    private final String syslogIdentifier;
+
     SystemdJournalAppender(final String name, final Filter filter, final boolean ignoreExceptions,
             SystemdJournalLibrary journalLibrary, boolean logSource, boolean logStacktrace, boolean logThreadName,
-            boolean logLoggerName, boolean logThreadContext, String threadContextPrefix) {
+            boolean logLoggerName, boolean logThreadContext, String threadContextPrefix, String syslogIdentifier) {
         super(name, filter, null, ignoreExceptions);
         this.journalLibrary = journalLibrary;
         this.logSource = logSource;
@@ -53,6 +57,7 @@ public class SystemdJournalAppender extends AbstractAppender {
         } else {
             this.threadContextPrefix = normalizeKey(threadContextPrefix);
         }
+        this.syslogIdentifier = syslogIdentifier;
     }
 
     @PluginFactory
@@ -64,6 +69,7 @@ public class SystemdJournalAppender extends AbstractAppender {
             @PluginAttribute("logThreadName") final String logThreadNameString,
             @PluginAttribute("logThreadContext") final String logThreadContextString,
             @PluginAttribute("threadContextPrefix") final String threadContextPrefix,
+            @PluginAttribute("syslogIdentifier") final String syslogIdentifier,
             @PluginElement("Filter") final Filter filter, @PluginConfiguration final Configuration config) {
         final boolean ignoreExceptions = Booleans.parseBoolean(ignoreExceptionsString, true);
         final boolean logSource = Booleans.parseBoolean(logSourceString, false);
@@ -81,7 +87,7 @@ public class SystemdJournalAppender extends AbstractAppender {
                 SystemdJournalLibrary.class);
 
         return new SystemdJournalAppender(name, filter, ignoreExceptions, journalLibrary, logSource, logStacktrace,
-                logThreadName, logLoggerName, logThreadContext, threadContextPrefix);
+                logThreadName, logLoggerName, logThreadContext, threadContextPrefix, syslogIdentifier);
     }
 
     private int log4jLevelToJournalPriority(Level level) {
@@ -163,6 +169,11 @@ public class SystemdJournalAppender extends AbstractAppender {
                     args.add(entry.getValue());
                 }
             }
+        }
+
+        if (syslogIdentifier != null && !syslogIdentifier.isEmpty()) {
+            args.add("SYSLOG_IDENTIFIER=%s");
+            args.add(syslogIdentifier);
         }
 
         args.add(null); // null terminated

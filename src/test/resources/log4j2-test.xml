@@ -10,7 +10,9 @@
                         logSource="true"
                         logLoggerName="true"
                         logThreadContext="true"
-                        threadContextPrefix="THREAD_CONTEXT_" />
+                        threadContextPrefix="THREAD_CONTEXT_"
+                        syslogIdentifier="log4j2-test"
+        />
     </Appenders>
     <Loggers>
         <Root level="INFO">

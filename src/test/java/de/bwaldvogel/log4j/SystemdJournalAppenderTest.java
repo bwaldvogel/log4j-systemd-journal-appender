@@ -28,7 +28,7 @@ public class SystemdJournalAppenderTest {
     @Test
     public void testAppend_Simple() {
         SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
-                false, false, false, false, false, null);
+                false, false, false, false, false, null, null);
 
         Message message = mock(Message.class);
         when(message.getFormattedMessage()).thenReturn("some message");
@@ -49,7 +49,7 @@ public class SystemdJournalAppenderTest {
     public void testAppend_LogSource() {
 
         SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
-                true, false, false, false, false, null);
+                true, false, false, false, false, null, null);
 
         Message message = mock(Message.class);
         when(message.getFormattedMessage()).thenReturn("some message");
@@ -80,7 +80,7 @@ public class SystemdJournalAppenderTest {
     public void testAppend_DoNotLogException() {
 
         SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
-                false, false, false, false, false, null);
+                false, false, false, false, false, null, null);
 
         Message message = mock(Message.class);
         when(message.getFormattedMessage()).thenReturn("some message");
@@ -107,7 +107,7 @@ public class SystemdJournalAppenderTest {
     public void testAppend_ThreadAndContext() {
 
         SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
-                false, false, true, true, true, null);
+                false, false, true, true, true, null, "some-identifier");
 
         Message message = mock(Message.class);
         when(message.getFormattedMessage()).thenReturn("some message");
@@ -134,6 +134,8 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add("some logger");
         expectedArgs.add("THREAD_CONTEXT_FOO_S_1_D=%s");
         expectedArgs.add("bar");
+        expectedArgs.add("SYSLOG_IDENTIFIER=%s");
+        expectedArgs.add("some-identifier");
         expectedArgs.add(null);
 
         verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
