@@ -36,6 +36,8 @@ public class SystemdJournalAppender extends AbstractAppender {
 
     private final boolean logLoggerName;
 
+    private final boolean logAppenderName;
+
     private final boolean logThreadContext;
 
     private final String threadContextPrefix;
@@ -44,13 +46,14 @@ public class SystemdJournalAppender extends AbstractAppender {
 
     SystemdJournalAppender(final String name, final Filter filter, final boolean ignoreExceptions,
             SystemdJournalLibrary journalLibrary, boolean logSource, boolean logStacktrace, boolean logThreadName,
-            boolean logLoggerName, boolean logThreadContext, String threadContextPrefix, String syslogIdentifier) {
+            boolean logLoggerName, boolean logAppenderName, boolean logThreadContext, String threadContextPrefix, String syslogIdentifier) {
         super(name, filter, null, ignoreExceptions);
         this.journalLibrary = journalLibrary;
         this.logSource = logSource;
         this.logStacktrace = logStacktrace;
         this.logThreadName = logThreadName;
         this.logLoggerName = logLoggerName;
+        this.logAppenderName = logAppenderName;
         this.logThreadContext = logThreadContext;
         if (threadContextPrefix == null) {
             this.threadContextPrefix = "THREAD_CONTEXT_";
@@ -66,6 +69,7 @@ public class SystemdJournalAppender extends AbstractAppender {
             @PluginAttribute("logSource") final String logSourceString,
             @PluginAttribute("logStacktrace") final String logStacktraceString,
             @PluginAttribute("logLoggerName") final String logLoggerNameString,
+            @PluginAttribute("logAppenderName") final String logAppenderNameString,
             @PluginAttribute("logThreadName") final String logThreadNameString,
             @PluginAttribute("logThreadContext") final String logThreadContextString,
             @PluginAttribute("threadContextPrefix") final String threadContextPrefix,
@@ -76,6 +80,7 @@ public class SystemdJournalAppender extends AbstractAppender {
         final boolean logStacktrace = Booleans.parseBoolean(logStacktraceString, true);
         final boolean logThreadName = Booleans.parseBoolean(logThreadNameString, true);
         final boolean logLoggerName = Booleans.parseBoolean(logLoggerNameString, true);
+        final boolean logAppenderName = Booleans.parseBoolean(logAppenderNameString, true);
         final boolean logThreadContext = Booleans.parseBoolean(logThreadContextString, true);
 
         if (name == null) {
@@ -87,7 +92,7 @@ public class SystemdJournalAppender extends AbstractAppender {
                 SystemdJournalLibrary.class);
 
         return new SystemdJournalAppender(name, filter, ignoreExceptions, journalLibrary, logSource, logStacktrace,
-                logThreadName, logLoggerName, logThreadContext, threadContextPrefix, syslogIdentifier);
+                logThreadName, logLoggerName, logAppenderName, logThreadContext, threadContextPrefix, syslogIdentifier);
     }
 
     private int log4jLevelToJournalPriority(Level level) {
@@ -137,6 +142,11 @@ public class SystemdJournalAppender extends AbstractAppender {
         if (logLoggerName) {
             args.add("LOG4J_LOGGER=%s");
             args.add(event.getLoggerName());
+        }
+
+        if (logAppenderName) {
+            args.add("LOG4J_APPENDER=%s");
+            args.add(getName());
         }
 
         if (logStacktrace && event.getThrown() != null) {

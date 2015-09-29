@@ -9,6 +9,7 @@
                         logThreadName="true"
                         logSource="true"
                         logLoggerName="true"
+                        logAppenderName="true"
                         logThreadContext="true"
                         threadContextPrefix="THREAD_CONTEXT_"
                         syslogIdentifier="log4j2-test"
