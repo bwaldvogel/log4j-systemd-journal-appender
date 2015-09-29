@@ -23,6 +23,8 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     private boolean logLoggerName = true;
 
+    private boolean logAppenderName = true;
+
     private boolean logMdc = true;
 
     private String mdcPrefix = "LOG4J_MDC_";
@@ -101,6 +103,11 @@ public class SystemdJournalAppender extends AppenderSkeleton {
             args.add(event.getLogger().getName());
         }
 
+        if (logAppenderName) {
+            args.add("LOG4J_APPENDER=%s");
+            args.add(getName());
+        }
+
         if (logStacktrace && event.getThrowableStrRep() != null) {
             StringBuilder sb = new StringBuilder();
             for (String stackTrace : event.getThrowableStrRep()) {
@@ -138,6 +145,10 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     public void setLogLoggerName(boolean logLoggerName) {
         this.logLoggerName = logLoggerName;
+    }
+
+    public void setLogAppenderName(boolean logAppenderName) {
+        this.logAppenderName = logAppenderName;
     }
 
     public void setLogMdc(boolean logMdc) {

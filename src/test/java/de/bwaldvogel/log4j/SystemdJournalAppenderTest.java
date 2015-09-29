@@ -26,6 +26,7 @@ public class SystemdJournalAppenderTest {
         SystemdJournalAppender journalAppender = new SystemdJournalAppender(journalLibrary);
         journalAppender.setLogThreadName(false);
         journalAppender.setLogLoggerName(false);
+        journalAppender.setLogAppenderName(false);
 
         Logger logger = Logger.getLogger(SystemdJournalAppenderTest.class);
         LoggingEvent event = new LoggingEvent("foo", logger, Level.INFO, "some message", null);
@@ -48,6 +49,7 @@ public class SystemdJournalAppenderTest {
         journalAppender.setLogStacktrace(false);
         journalAppender.setLogThreadName(false);
         journalAppender.setLogLoggerName(false);
+        journalAppender.setLogAppenderName(false);
 
         Logger logger = Logger.getLogger(SystemdJournalAppenderTest.class);
         LoggingEvent event = new LoggingEvent("foo", logger, Level.INFO, "some message", new Throwable());
@@ -67,6 +69,7 @@ public class SystemdJournalAppenderTest {
     public void testAppend_ThreadAndMdc() {
 
         SystemdJournalAppender journalAppender = new SystemdJournalAppender(journalLibrary);
+        journalAppender.setName("some appender");
         journalAppender.setLogThreadName(true);
         journalAppender.setLogLoggerName(true);
         journalAppender.setLogMdc(true);
@@ -86,6 +89,8 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add(Thread.currentThread().getName());
         expectedArgs.add("LOG4J_LOGGER=%s");
         expectedArgs.add(logger.getName());
+        expectedArgs.add("LOG4J_APPENDER=%s");
+        expectedArgs.add("some appender");
         expectedArgs.add("FOO=%s");
         expectedArgs.add("bar");
         expectedArgs.add(null);
