@@ -91,7 +91,7 @@ Use `journalctl -o verbose` to show all fields:
 
 ```
 # journalctl -o verbose -n
-Mo 2014-10-13 21:26:00.873732 CEST [s=c25294…;i=470;b=ea0fe2…;m=14612…;t=50
+Di 2015-09-29 21:07:05.850017 CEST [s=45e0…;i=984;b=c257…;m=1833…;t=520e…;x=3e1e…]
     PRIORITY=6
     _TRANSPORT=journal
     _UID=1000
@@ -99,32 +99,34 @@ Mo 2014-10-13 21:26:00.873732 CEST [s=c25294…;i=470;b=ea0fe2…;m=14612…;t=5
     _CAP_EFFECTIVE=0
     _SYSTEMD_OWNER_UID=1000
     _SYSTEMD_SLICE=user-1000.slice
-    _BOOT_ID=ea0fe2…
     _MACHINE_ID=4abc6d…
     _HOSTNAME=myhost
     _SYSTEMD_CGROUP=/user.slice/user-1000.slice/session-2.scope
     _SYSTEMD_SESSION=2
     _SYSTEMD_UNIT=session-2.scope
-    CODE_FILE=src/main/c/log4j-systemd-journal-adapter.cpp
-    CODE_LINE=30
-    CODE_FUNC=Java_de_bwaldvogel_log4j_SystemdJournalAdapter_sendv
-    SYSLOG_IDENTIFIER=java
-    _COMM=java
-    _EXE=/opt/oracle-jdk-bin-1.7.0.65/bin/java
-    MESSAGE=this is an example
+    _BOOT_ID=c257f8…
     THREAD_NAME=main
-    THREAD_CONTEXT_MY_KEY=some value
-    LOG4J_LOGGER=YourExample
-    _PID=2370
-    _CMDLINE=/opt/oracle-jdk-bin-1.7.0.65/bin/java …
-    _SOURCE_REALTIME_TIMESTAMP=1413228360873732
+    LOG4J_LOGGER=de.bwaldvogel.log4j.SystemdJournalAppenderIntegrationTest
+    _COMM=java
+    _EXE=/opt/oracle-jdk-bin-1.7.0.80/bin/java
+    MESSAGE=this is a test message with a MDC
+    CODE_FILE=SystemdJournalAppenderIntegrationTest.java
+    CODE_FUNC=testMessageWithMDC
+    CODE_LINE=36
+    THREAD_CONTEXT_SOME_KEY1=some value %d
+    THREAD_CONTEXT_SOME_KEY2=some other value with unicode: →←üöß
+    SYSLOG_IDENTIFIER=log4j2-test
+    LOG4J_APPENDER=Journal
+    _PID=8224
+    _CMDLINE=/opt/oracle-jdk-bin-1.7.0.80/bin/java …
+    _SOURCE_REALTIME_TIMESTAMP=1443553625850017
 ```
 
 Note that the [ThreadContext][thread-context] key-value pair `{"MY_KEY": "some value"}` is automatically added as field with prefix `THREAD_CONTEXT`.
 
 You can use the power of [systemd journal][systemd-journal] to filter for interesting messages. Example:
 
-`journalctl LOG4J_LOGGER=YourExample THREAD_NAME=main` will only show messages that are logged from the Java main thread via the `YourExample` logger.
+`journalctl CODE_FUNC=testMessageWithMDC THREAD_NAME=main` will only show messages that are logged from the Java main thread in a method called `testMessageWithMDC`.
 
 ## Related Work ##
 
