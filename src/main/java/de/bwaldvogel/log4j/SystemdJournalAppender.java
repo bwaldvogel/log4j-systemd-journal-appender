@@ -46,7 +46,7 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     @Override
     public boolean requiresLayout() {
-        return false;
+        return true;
     }
 
     private int log4jLevelToJournalPriority(Level level) {
@@ -83,7 +83,12 @@ public class SystemdJournalAppender extends AppenderSkeleton {
     protected void append(LoggingEvent event) {
         List<Object> args = new ArrayList<>();
 
-        args.add(event.getRenderedMessage());
+        if (this.layout != null) {
+            args.add(this.layout.format(event));
+        }
+        else {
+            args.add(event.getRenderedMessage());
+        }
 
         args.add("PRIORITY=%d");
         args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));

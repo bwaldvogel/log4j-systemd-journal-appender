@@ -49,6 +49,8 @@ log4j.appender.journal=de.bwaldvogel.SystemdJournalAppender
 log4j.appender.journal.logStacktrace=true
 log4j.appender.journal.logThreadName=true
 log4j.appender.journal.logLoggerName=true
+log4j.appender.console.layout=org.apache.log4j.PatternLayout
+log4j.appender.console.layout.ConversionPattern=%-5p [%.20c] %m%n
 
 log4j.appender.console=org.apache.log4j.ConsoleAppender
 log4j.appender.console.layout=org.apache.log4j.PatternLayout
@@ -56,8 +58,7 @@ log4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%.
 ```
 
 This will tell Log4j to log to [systemd journal][systemd-journal] as well as to stdout (console).
-Note that a layout is not set for the `SystemdJournalAppender` and would be ignored if given.
-This is because meta data of a log event such as the timestamp, the logger name or the Java thread name are mapped to [systemd-journal fields][systemd-journal-fields] and need not be rendered into a string that loses all the semantic information.
+Note that a layout set for the `SystemdJournalAppender` does not include the timestamp, as this will be provided by the journal viewer normally. In fact the layout is optional, because meta data of a log event such as the timestamp, the logger name or the Java thread name are mapped to [systemd-journal fields][systemd-journal-fields] and need not be rendered into a string that loses all the semantic information.
 
 ### `YourExample.java`
 ```java
@@ -80,7 +81,7 @@ Running this sample class will log a message to journald:
 
 ```
 # journalctl -n
-Okt 13 21:26:00 myhost java[2370]: this is an example
+Okt 13 21:26:00 myhost java[2370]: INFO  [YourExample] this is an example
 ```
 
 Use `journalctl -o verbose` to show all fields:
