@@ -27,6 +27,8 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     private boolean logMdc = true;
 
+    private boolean appendStacktrace = false;
+
     private String mdcPrefix = "LOG4J_MDC_";
 
     private String syslogIdentifier;
@@ -46,7 +48,7 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     @Override
     public boolean requiresLayout() {
-        return false;
+        return true;
     }
 
     private int log4jLevelToJournalPriority(Level level) {
@@ -82,8 +84,27 @@ public class SystemdJournalAppender extends AppenderSkeleton {
     @Override
     protected void append(LoggingEvent event) {
         List<Object> args = new ArrayList<>();
+        String message;
 
-        args.add(event.getRenderedMessage());
+        if (this.layout != null) {
+            message = this.layout.format(event);
+        }
+        else {
+            message = event.getRenderedMessage();
+        }
+        if (appendStacktrace) {
+            String[] s = event.getThrowableStrRep();
+            if (s != null) {
+                StringBuilder msgB = new StringBuilder(this.layout.format(event));
+                int len = s.length;
+                for(int i = 0; i < len; i++) {
+                    msgB.append(s[i]);
+                    msgB.append(LINE_SEPARATOR);
+                }
+                message = msgB.toString();
+            }
+        }
+        args.add(message);
 
         args.add("PRIORITY=%d");
         args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
@@ -153,6 +174,10 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     public void setLogMdc(boolean logMdc) {
         this.logMdc = logMdc;
+    }
+
+    public void setAppendStacktrace(boolean appendStacktrace) {
+        this.appendStacktrace = appendStacktrace;
     }
 
     public void setMdcPrefix(String mdcPrefix) {
