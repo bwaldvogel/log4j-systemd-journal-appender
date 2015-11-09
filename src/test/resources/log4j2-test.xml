@@ -4,7 +4,21 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
         </Console>
-        <SystemdJournal name="Journal"
+        <SystemdJournal name="JournalWithLayout"
+                        logStacktrace="true"
+                        appendStacktrace="true"
+                        logThreadName="true"
+                        logSource="true"
+                        logLoggerName="true"
+                        logAppenderName="true"
+                        logThreadContext="true"
+                        threadContextPrefix="THREAD_CONTEXT_"
+                        syslogIdentifier="log4j2-test-with-layout"
+        >
+            <PatternLayout pattern="[%t] %-5level - %msg%n" />
+        </SystemdJournal>
+
+        <SystemdJournal name="JournalWithoutLayout"
                         logStacktrace="true"
                         logThreadName="true"
                         logSource="true"
@@ -12,13 +26,14 @@
                         logAppenderName="true"
                         logThreadContext="true"
                         threadContextPrefix="THREAD_CONTEXT_"
-                        syslogIdentifier="log4j2-test"
+                        syslogIdentifier="log4j2-test-no-layout"
         />
     </Appenders>
     <Loggers>
         <Root level="INFO">
             <AppenderRef ref="Console" />
-            <AppenderRef ref="Journal" />
+            <AppenderRef ref="JournalWithLayout" />
+            <AppenderRef ref="JournalWithoutLayout" />
         </Root>
     </Loggers>
 </Configuration>

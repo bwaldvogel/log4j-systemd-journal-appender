@@ -1,14 +1,9 @@
 package de.bwaldvogel.log4j;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.sun.jna.Native;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.Configuration;
@@ -19,7 +14,13 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.util.Booleans;
 
-import com.sun.jna.Native;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 @Plugin(name = "SystemdJournal", category = "Core", elementType = "appender", printObject = true)
 public class SystemdJournalAppender extends AbstractAppender {
@@ -44,10 +45,10 @@ public class SystemdJournalAppender extends AbstractAppender {
 
     private final String syslogIdentifier;
 
-    SystemdJournalAppender(final String name, final Filter filter, final boolean ignoreExceptions,
-            SystemdJournalLibrary journalLibrary, boolean logSource, boolean logStacktrace, boolean logThreadName,
-            boolean logLoggerName, boolean logAppenderName, boolean logThreadContext, String threadContextPrefix, String syslogIdentifier) {
-        super(name, filter, null, ignoreExceptions);
+    SystemdJournalAppender(String name, Filter filter, Layout layout, boolean ignoreExceptions,
+                           SystemdJournalLibrary journalLibrary, boolean logSource, boolean logStacktrace, boolean logThreadName,
+                           boolean logLoggerName, boolean logAppenderName, boolean logThreadContext, String threadContextPrefix, String syslogIdentifier) {
+        super(name, filter, layout, ignoreExceptions);
         this.journalLibrary = journalLibrary;
         this.logSource = logSource;
         this.logStacktrace = logStacktrace;
@@ -74,7 +75,9 @@ public class SystemdJournalAppender extends AbstractAppender {
             @PluginAttribute("logThreadContext") final String logThreadContextString,
             @PluginAttribute("threadContextPrefix") final String threadContextPrefix,
             @PluginAttribute("syslogIdentifier") final String syslogIdentifier,
-            @PluginElement("Filter") final Filter filter, @PluginConfiguration final Configuration config) {
+            @PluginElement("Layout") final Layout layout,
+            @PluginElement("Filter") final Filter filter,
+            @PluginConfiguration final Configuration config) {
         final boolean ignoreExceptions = Booleans.parseBoolean(ignoreExceptionsString, true);
         final boolean logSource = Booleans.parseBoolean(logSourceString, false);
         final boolean logStacktrace = Booleans.parseBoolean(logStacktraceString, true);
@@ -91,7 +94,7 @@ public class SystemdJournalAppender extends AbstractAppender {
         SystemdJournalLibrary journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd",
                 SystemdJournalLibrary.class);
 
-        return new SystemdJournalAppender(name, filter, ignoreExceptions, journalLibrary, logSource, logStacktrace,
+        return new SystemdJournalAppender(name, filter, layout, ignoreExceptions, journalLibrary, logSource, logStacktrace,
                 logThreadName, logLoggerName, logAppenderName, logThreadContext, threadContextPrefix, syslogIdentifier);
     }
 
@@ -129,7 +132,7 @@ public class SystemdJournalAppender extends AbstractAppender {
     public void append(LogEvent event) {
         List<Object> args = new ArrayList<>();
 
-        args.add(event.getMessage().getFormattedMessage());
+        args.add(buildFormattedMessage(event));
 
         args.add("PRIORITY=%d");
         args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
@@ -189,6 +192,14 @@ public class SystemdJournalAppender extends AbstractAppender {
         args.add(null); // null terminated
 
         journalLibrary.sd_journal_send("MESSAGE=%s", args.toArray());
+    }
+
+    private String buildFormattedMessage(LogEvent event) {
+        if (getLayout() != null) {
+            byte[] message = getLayout().toByteArray(event);
+            return new String(message, StandardCharsets.UTF_8);
+        }
+        return event.getMessage().getFormattedMessage();
     }
 
     private static String normalizeKey(String key) {

@@ -61,7 +61,7 @@ The appender can be configured with the following properties
 ```
 
 This will tell Log4j to log to [systemd journal][systemd-journal] as well as to stdout (console).
-Note that a layout is not set for `SystemdJournal`.
+Note that a layout is optional for `SystemdJournal`.
 This is because meta data of a log event such as the timestamp, the logger name or the Java thread name are mapped to [systemd-journal fields][systemd-journal-fields] and need not be rendered into a string that loses all the semantic information.
 
 ### `YourExample.java`

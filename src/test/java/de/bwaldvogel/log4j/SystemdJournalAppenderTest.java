@@ -30,7 +30,7 @@ public class SystemdJournalAppenderTest {
 
     @Test
     public void testAppend_Simple() {
-        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
                 false, false, false, false, false, false, null, null);
 
         Message message = mock(Message.class);
@@ -51,7 +51,7 @@ public class SystemdJournalAppenderTest {
     @Test
     public void testAppend_LogSource() {
 
-        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
                 true, false, false, false, false, false, null, null);
 
         Message message = mock(Message.class);
@@ -82,7 +82,7 @@ public class SystemdJournalAppenderTest {
     @Test
     public void testAppend_DoNotLogException() {
 
-        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
                 false, false, false, false, false, false, null, null);
 
         Message message = mock(Message.class);
@@ -109,7 +109,7 @@ public class SystemdJournalAppenderTest {
     @Test
     public void testAppend_ThreadAndContext() {
 
-        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, false, journalLibrary,
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
                 false, false, true, true, true, true, null, "some-identifier");
 
         Message message = mock(Message.class);
