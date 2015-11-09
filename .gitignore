@@ -1,5 +1,6 @@
 .*.swp
 /.idea
+/*.iml
 /.classpath
 /.project
 /.settings
