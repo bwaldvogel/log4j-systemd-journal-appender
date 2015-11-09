@@ -1,20 +1,21 @@
 package de.bwaldvogel.log4j;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mock;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.ThreadContext;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.impl.Log4jLogEvent;
+import org.apache.logging.log4j.message.Message;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.impl.Log4jLogEvent;
-import org.apache.logging.log4j.message.Message;
-import org.junit.Before;
-import org.junit.Test;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mock;
 
 public class SystemdJournalAppenderTest {
 
@@ -23,6 +24,8 @@ public class SystemdJournalAppenderTest {
     @Before
     public void prepare() {
         journalLibrary = mock(SystemdJournalLibrary.class);
+
+        ThreadContext.clearAll();
     }
 
     @Test
@@ -70,7 +73,7 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add("CODE_FUNC=%s");
         expectedArgs.add("testAppend_LogSource");
         expectedArgs.add("CODE_LINE=%d");
-        expectedArgs.add(Integer.valueOf(62));
+        expectedArgs.add(Integer.valueOf(65));
         expectedArgs.add(null);
 
         verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
