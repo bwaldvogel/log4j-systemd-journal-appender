@@ -1,16 +1,17 @@
 package de.bwaldvogel.log4j;
 
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.MDC;
+import org.apache.log4j.spi.LoggingEvent;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
-import org.junit.Before;
-import org.junit.Test;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.mock;
 
 public class SystemdJournalAppenderTest {
 
@@ -19,6 +20,8 @@ public class SystemdJournalAppenderTest {
     @Before
     public void prepare() {
         journalLibrary = mock(SystemdJournalLibrary.class);
+
+        MDC.clear();
     }
 
     @Test

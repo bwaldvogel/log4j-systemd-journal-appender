@@ -1,19 +1,18 @@
 package de.bwaldvogel.log4j;
 
+import com.sun.jna.Native;
+import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.Level;
+import org.apache.log4j.spi.LoggingEvent;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.Level;
-import org.apache.log4j.spi.LoggingEvent;
-
-import com.sun.jna.Native;
-
 public class SystemdJournalAppender extends AppenderSkeleton {
 
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    protected static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private final SystemdJournalLibrary journalLibrary;
 
@@ -26,8 +25,6 @@ public class SystemdJournalAppender extends AppenderSkeleton {
     private boolean logAppenderName = true;
 
     private boolean logMdc = true;
-
-    private boolean appendStacktrace = false;
 
     private String mdcPrefix = "LOG4J_MDC_";
 
@@ -48,7 +45,7 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     @Override
     public boolean requiresLayout() {
-        return true;
+        return false;
     }
 
     private int log4jLevelToJournalPriority(Level level) {
@@ -84,27 +81,7 @@ public class SystemdJournalAppender extends AppenderSkeleton {
     @Override
     protected void append(LoggingEvent event) {
         List<Object> args = new ArrayList<>();
-        String message;
-
-        if (this.layout != null) {
-            message = this.layout.format(event);
-        }
-        else {
-            message = event.getRenderedMessage();
-        }
-        if (appendStacktrace) {
-            String[] s = event.getThrowableStrRep();
-            if (s != null) {
-                StringBuilder msgB = new StringBuilder(this.layout.format(event));
-                int len = s.length;
-                for(int i = 0; i < len; i++) {
-                    msgB.append(s[i]);
-                    msgB.append(LINE_SEPARATOR);
-                }
-                message = msgB.toString();
-            }
-        }
-        args.add(message);
+        args.add(buildRenderedMessage(event));
 
         args.add("PRIORITY=%d");
         args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
@@ -152,6 +129,10 @@ public class SystemdJournalAppender extends AppenderSkeleton {
         journalLibrary.sd_journal_send("MESSAGE=%s", args.toArray());
     }
 
+    protected String buildRenderedMessage(LoggingEvent event) {
+        return event.getRenderedMessage();
+    }
+
     private static String normalizeKey(Object key) {
         return key.toString().toUpperCase().replaceAll("[^_A-Z0-9]", "_");
     }
@@ -174,10 +155,6 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     public void setLogMdc(boolean logMdc) {
         this.logMdc = logMdc;
-    }
-
-    public void setAppendStacktrace(boolean appendStacktrace) {
-        this.appendStacktrace = appendStacktrace;
     }
 
     public void setMdcPrefix(String mdcPrefix) {

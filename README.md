@@ -21,6 +21,8 @@ Configure the appender in your `log4j.properties`:
 log4j.appender.journal=de.bwaldvogel.SystemdJournalAppender
 ```
 
+Alternatively use `de.bwaldvogel.SystemdJournalAppenderWithLayout` if you want to format messages with a layout.
+
 ## Configuration ##
 
 The appender can be configured with the following properties
@@ -28,21 +30,21 @@ The appender can be configured with the following properties
        Property name      | Default      | Type    | Description
        -------------------| ------------ | ------- | -----------
        `logStacktrace`    | true         | boolean | Determines whether the full exception stack trace is logged. This data is logged in the user field `STACKTRACE`.
-       `appendStacktrace` | true         | boolean | Determines whether the full exception stack trace is to be appended to the log message.
        `logThreadName`    | true         | boolean | Determines whether the thread name is logged. This data is logged in the user field `THREAD_NAME`.
        `logLoggerName`    | true         | boolean | Determines whether the logger name is logged. This data is logged in the user field `LOG4J_LOGGER`.
        `logAppenderName`  | true         | boolean | Determines whether the appender name is logged. This data is logged in the user field `LOG4J_APPENDER`.
        `logMdc`           | true         | boolean | Determines whether the [thread context][thread-context] is logged. Each key/value pair is logged as user field with the `mdcPrefix` prefix.
        `mdcPrefix`        | `LOG4J_MDC_` | String  | Determines how [MDC][mdc] keys should be prefixed when `logMdc` is set to true. Note that keys need to match the regex pattern `[A-Z0-9_]+` and are normalized otherwise.
        `syslogIdentifier` | null         | String  | This data is logged in the user field `SYSLOG_IDENTIFIER`.  If this is not set, the underlying system will use the command name (usually `java`) instead.
+       `appendStacktrace` | true         | boolean | `SystemdJournalAppenderWithLayout` only: Determines whether the full exception stack trace is to be appended to the log message.
 
 ### Runtime dependencies ###
     - Linux with systemd-journal
     - Log4j 1.2
 
-## Example ##
+## Examples ##
 
-### `log4j.properties`
+### `log4j.properties` without layout
 ```
 log4j.rootLogger=INFO, journal, console
 
@@ -50,8 +52,19 @@ log4j.appender.journal=de.bwaldvogel.SystemdJournalAppender
 log4j.appender.journal.logStacktrace=true
 log4j.appender.journal.logThreadName=true
 log4j.appender.journal.logLoggerName=true
+
+log4j.appender.console=org.apache.log4j.ConsoleAppender
 log4j.appender.console.layout=org.apache.log4j.PatternLayout
-log4j.appender.console.layout.ConversionPattern=%-5p [%.20c] %m%n
+log4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%.20c] %m%n
+```
+
+### `log4j.properties` with layout
+```
+log4j.rootLogger=INFO, journal, console
+
+log4j.appender.journal=de.bwaldvogel.SystemdJournalAppenderWithLayout
+log4j.appender.journal.layout=org.apache.log4j.PatternLayout
+log4j.appender.journal.layout.ConversionPattern=%-5p [%.20c] %m%n
 
 log4j.appender.console=org.apache.log4j.ConsoleAppender
 log4j.appender.console.layout=org.apache.log4j.PatternLayout
@@ -59,7 +72,10 @@ log4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%.
 ```
 
 This will tell Log4j to log to [systemd journal][systemd-journal] as well as to stdout (console).
-Note that a layout set for the `SystemdJournalAppender` does not include the timestamp, as this will be provided by the journal viewer normally. In fact the layout is optional, because meta data of a log event such as the timestamp, the logger name or the Java thread name are mapped to [systemd-journal fields][systemd-journal-fields] and need not be rendered into a string that loses all the semantic information.
+Note that a layout is not used in case of `SystemdJournalAppender` because meta data of a log event such as the timestamp, the logger name or the Java thread name are
+mapped to [systemd-journal fields][systemd-journal-fields] and need not be rendered into a string that loses all the semantic information.
+An additional layout is used with the `SystemdJournalAppenderWithLayout` appender.
+Note that the message does not include the timestamp, as this will be provided by the journal viewer normally.
 
 ### `YourExample.java`
 ```java
