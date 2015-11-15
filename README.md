@@ -11,7 +11,7 @@ Add the following Maven dependency to your project:
 <dependency>
 	<groupId>de.bwaldvogel</groupId>
 	<artifactId>log4j-systemd-journal-appender</artifactId>
-	<version>2.2.1</version>
+	<version>2.2.2</version>
 	<scope>runtime</scope>
 </dependency>
 ```
