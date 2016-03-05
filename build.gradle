@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'nexus'
+apply plugin: 'org.standardout.versioneye'
 
 version = '2.2.2'
 
@@ -29,6 +30,7 @@ buildscript {
 
     dependencies {
         classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7.1'
+        classpath 'org.standardout:gradle-versioneye-plugin:1.2.0'
     }
 }
 
