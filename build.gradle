@@ -36,7 +36,7 @@ buildscript {
 
 ext {
     log4jVersion = '1.2.17'
-    powermockVersion = '1.6.3'
+    powermockVersion = '1.6.4'
 }
 
 modifyPom {
