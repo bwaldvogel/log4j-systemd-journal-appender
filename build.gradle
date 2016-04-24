@@ -84,7 +84,7 @@ repositories {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.8'
+    gradleVersion = '2.12'
 }
 
 dependencies {
