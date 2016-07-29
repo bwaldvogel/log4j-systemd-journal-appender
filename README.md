@@ -49,7 +49,7 @@ The appender can be configured with the following properties
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
         </Console>
-        <SystemdJournal name="journal" logStacktraces="true" logSource="false" />
+        <SystemdJournal name="journal" logStacktrace="true" logSource="false" />
     </Appenders>
     <Loggers>
         <Root level="INFO">
