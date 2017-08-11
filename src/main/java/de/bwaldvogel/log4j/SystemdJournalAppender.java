@@ -87,7 +87,7 @@ public class SystemdJournalAppender extends AbstractAppender {
         final boolean logThreadContext = Booleans.parseBoolean(logThreadContextString, true);
 
         if (name == null) {
-            LOGGER.error("No name provided for FileAppender");
+            LOGGER.error("No name provided for SystemdJournalAppender");
             return null;
         }
 
