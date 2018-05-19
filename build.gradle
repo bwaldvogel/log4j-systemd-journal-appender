@@ -3,7 +3,7 @@ apply plugin: 'eclipse'
 apply plugin: 'nexus'
 apply plugin: 'org.standardout.versioneye'
 
-version = '2.2.2'
+version = '2.3.0'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
