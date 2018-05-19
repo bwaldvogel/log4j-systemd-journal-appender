@@ -6,7 +6,6 @@
         </Console>
         <SystemdJournal name="JournalWithLayout"
                         logStacktrace="true"
-                        appendStacktrace="true"
                         logThreadName="true"
                         logSource="true"
                         logLoggerName="true"
