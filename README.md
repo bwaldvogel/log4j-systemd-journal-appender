@@ -22,23 +22,23 @@ Add the following Maven dependency to your project:
 See the [`1.x` branch][1.x-branch] of this project.
 
 ### Runtime dependencies ###
-    - Linux with systemd-journal
-    - Log4j 2.x
+- Linux with systemd-journal
+- Log4j 2.x
 
 ## Configuration
 
 The appender can be configured with the following properties
 
-	Property name         | Default           | Type    | Description
-	--------------------- | ----------------- | ------- | -----------
-	`logSource`           | false             | boolean | Determines whether the log locations are logged. Note that there is a performance overhead when switched on. The data is logged in standard systemd journal fields `CODE_FILE`, `CODE_LINE` and `CODE_FUNC`.
-	`logStacktrace`       | true              | boolean | Determines whether the full exception stack trace is logged. This data is logged in the user field `STACKTRACE`.
-	`logThreadName`       | true              | boolean | Determines whether the thread name is logged. This data is logged in the user field `THREAD_NAME`.
-	`logLoggerName`       | true              | boolean | Determines whether the logger name is logged. This data is logged in the user field `LOG4J_LOGGER`.
-	`logAppenderName`     | true              | boolean | Determines whether the appender name is logged. This data is logged in the user field `LOG4J_APPENDER`.
-	`logThreadContext`    | true              | boolean | Determines whether the [thread context][thread-context] is logged. Each key/value pair is logged as user field with the `threadContextPrefix` prefix.
-	`threadContextPrefix` | `THREAD_CONTEXT_` | String  | Determines how [thread context][thread-context] keys should be prefixed when `logThreadContext` is set to true. Note that keys need to match the regex pattern `[A-Z0-9_]+` and are normalized otherwise.
-	`syslogIdentifier`    | null              | String  | This data is logged in the user field `SYSLOG_IDENTIFIER`.  If this is not set, the underlying system will use the command name (usually `java`) instead.
+Property name         | Default           | Type    | Description
+--------------------- | ----------------- | ------- | -----------
+`logSource`           | false             | boolean | Determines whether the log locations are logged. Note that there is a performance overhead when switched on. The data is logged in standard systemd journal fields `CODE_FILE`, `CODE_LINE` and `CODE_FUNC`.
+`logStacktrace`       | true              | boolean | Determines whether the full exception stack trace is logged. This data is logged in the user field `STACKTRACE`.
+`logThreadName`       | true              | boolean | Determines whether the thread name is logged. This data is logged in the user field `THREAD_NAME`.
+`logLoggerName`       | true              | boolean | Determines whether the logger name is logged. This data is logged in the user field `LOG4J_LOGGER`.
+`logAppenderName`     | true              | boolean | Determines whether the appender name is logged. This data is logged in the user field `LOG4J_APPENDER`.
+`logThreadContext`    | true              | boolean | Determines whether the [thread context][thread-context] is logged. Each key/value pair is logged as user field with the `threadContextPrefix` prefix.
+`threadContextPrefix` | `THREAD_CONTEXT_` | String  | Determines how [thread context][thread-context] keys should be prefixed when `logThreadContext` is set to true. Note that keys need to match the regex pattern `[A-Z0-9_]+` and are normalized otherwise.
+`syslogIdentifier`    | null              | String  | This data is logged in the user field `SYSLOG_IDENTIFIER`.  If this is not set, the underlying system will use the command name (usually `java`) instead.
 
 ## Example ##
 
@@ -110,7 +110,7 @@ Di 2015-09-29 21:07:05.850017 CEST [s=45e0…;i=984;b=c257…;m=1833…;t=520e�
     THREAD_NAME=main
     LOG4J_LOGGER=de.bwaldvogel.log4j.SystemdJournalAppenderIntegrationTest
     _COMM=java
-    _EXE=/opt/oracle-jdk-bin-1.7.0.80/bin/java
+    _EXE=/usr/bin/java
     MESSAGE=this is a test message with a MDC
     CODE_FILE=SystemdJournalAppenderIntegrationTest.java
     CODE_FUNC=testMessageWithMDC
@@ -120,7 +120,7 @@ Di 2015-09-29 21:07:05.850017 CEST [s=45e0…;i=984;b=c257…;m=1833…;t=520e�
     SYSLOG_IDENTIFIER=log4j2-test
     LOG4J_APPENDER=Journal
     _PID=8224
-    _CMDLINE=/opt/oracle-jdk-bin-1.7.0.80/bin/java …
+    _CMDLINE=/usr/bin/java …
     _SOURCE_REALTIME_TIMESTAMP=1443553625850017
 ```
 
