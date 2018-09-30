@@ -13,6 +13,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginConfiguration;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.util.Booleans;
+import org.apache.logging.log4j.util.ReadOnlyStringMap;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -24,8 +25,6 @@ import java.util.Map.Entry;
 
 @Plugin(name = "SystemdJournal", category = "Core", elementType = "appender", printObject = true)
 public class SystemdJournalAppender extends AbstractAppender {
-
-    private static final long serialVersionUID = 1L;
 
     private final SystemdJournalLibrary journalLibrary;
 
@@ -45,7 +44,7 @@ public class SystemdJournalAppender extends AbstractAppender {
 
     private final String syslogIdentifier;
 
-    SystemdJournalAppender(String name, Filter filter, Layout layout, boolean ignoreExceptions,
+    SystemdJournalAppender(String name, Filter filter, Layout<?> layout, boolean ignoreExceptions,
                            SystemdJournalLibrary journalLibrary, boolean logSource, boolean logStacktrace, boolean logThreadName,
                            boolean logLoggerName, boolean logAppenderName, boolean logThreadContext, String threadContextPrefix, String syslogIdentifier) {
         super(name, filter, layout, ignoreExceptions);
@@ -75,7 +74,7 @@ public class SystemdJournalAppender extends AbstractAppender {
             @PluginAttribute("logThreadContext") final String logThreadContextString,
             @PluginAttribute("threadContextPrefix") final String threadContextPrefix,
             @PluginAttribute("syslogIdentifier") final String syslogIdentifier,
-            @PluginElement("Layout") final Layout layout,
+            @PluginElement("Layout") final Layout<?> layout,
             @PluginElement("Filter") final Filter filter,
             @PluginConfiguration final Configuration config) {
         final boolean ignoreExceptions = Booleans.parseBoolean(ignoreExceptionsString, true);
@@ -174,9 +173,9 @@ public class SystemdJournalAppender extends AbstractAppender {
         }
 
         if (logThreadContext) {
-            Map<String, String> context = event.getContextMap();
+            ReadOnlyStringMap context = event.getContextData();
             if (context != null) {
-                for (Entry<String, String> entry : context.entrySet()) {
+                for (Entry<String, String> entry : context.toMap().entrySet()) {
                     String key = entry.getKey();
                     args.add(threadContextPrefix + normalizeKey(key) + "=%s");
                     args.add(entry.getValue());
