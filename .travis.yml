@@ -16,9 +16,6 @@ matrix:
     - os: linux
       jdk: openjdk10
 
-env:
-    - TERM=dumb
-
 script:
     - ./gradlew assemble
 
