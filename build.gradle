@@ -36,7 +36,6 @@ buildscript {
 
 ext {
     log4jVersion = '2.11.0'
-    powermockVersion = '1.6.6'
 }
 
 modifyPom {
@@ -94,9 +93,7 @@ dependencies {
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.1'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
-
-    testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: powermockVersion
-    testCompile group: 'org.powermock', name: 'powermock-api-mockito', version: powermockVersion
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.22.0'
 }
 
 // vim: set ts=4 sw=4 et:
