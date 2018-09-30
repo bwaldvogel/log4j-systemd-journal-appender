@@ -34,7 +34,7 @@ buildscript {
 }
 
 ext {
-    log4jVersion = '2.11.0'
+    log4jVersion = '2.11.1'
 }
 
 modifyPom {
