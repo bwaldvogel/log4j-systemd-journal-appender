@@ -1,6 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'nexus'
+apply plugin: 'com.bmuschko.nexus'
 apply plugin: 'org.standardout.versioneye'
 
 version = '2.3.0'
@@ -29,8 +28,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7.1'
-        classpath 'org.standardout:gradle-versioneye-plugin:1.2.0'
+        classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1'
+        classpath 'org.standardout:gradle-versioneye-plugin:1.5.0'
     }
 }
 
@@ -71,10 +70,13 @@ modifyPom {
     }
 }
 
+extraArchive {
+    sources = true
+    tests = false
+    javadoc = true
+}
+
 nexus {
-    attachSources = true
-    attachTests = false
-    attachJavadoc = true
     sign = true
 }
 
