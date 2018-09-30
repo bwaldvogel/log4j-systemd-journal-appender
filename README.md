@@ -29,7 +29,7 @@ See the [`1.x` branch][1.x-branch] of this project.
 
 **Note:**
 
-JNA requires execute permissions in `${java.io.tmpdir}` (which defaults to `/tmp`).
+JNA requires execute permissions in `java.io.tmpdir` (which defaults to `/tmp`).
 For example, if the folder is mounted with "`noexec`" for security reasons, you need to define a different temporary directory for JNA:
 
     -Djna.tmpdir=/tmp-folder/with/exec/permissions
