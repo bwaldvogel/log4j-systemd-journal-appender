@@ -22,8 +22,17 @@ Add the following Maven dependency to your project:
 See the [`1.x` branch][1.x-branch] of this project.
 
 ### Runtime dependencies ###
+
+- Java 7 or later
 - Linux with systemd-journal
 - Log4j 2.x
+
+**Note:**
+
+JNA requires execute permissions in `${java.io.tmpdir}` (which defaults to `/tmp`).
+For example, if the folder is mounted with "`noexec`" for security reasons, you need to define a different temporary directory for JNA:
+
+    -Djna.tmpdir=/tmp-folder/with/exec/permissions
 
 ## Configuration
 
