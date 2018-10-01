@@ -2,6 +2,7 @@ apply plugin: 'java'
 apply plugin: 'com.bmuschko.nexus'
 apply plugin: 'org.standardout.versioneye'
 
+group = 'de.bwaldvogel'
 version = '2.4.0'
 
 sourceCompatibility = 1.7
@@ -42,7 +43,7 @@ modifyPom {
         groupId        'de.bwaldvogel'
         artifactId     'log4j-systemd-journal-appender'
         name           title
-        description    description
+        description    'Log4j appender for systemd journal.'
         url            url
         inceptionYear '2014'
 
@@ -68,12 +69,6 @@ modifyPom {
             }
         }
     }
-}
-
-extraArchive {
-    sources = true
-    tests = false
-    javadoc = true
 }
 
 nexus {
