@@ -124,8 +124,7 @@ Di 2015-09-29 21:07:05.850017 CEST [s=45e0…;i=984;b=c257…;m=1833…;t=520e�
     CODE_FILE=SystemdJournalAppenderIntegrationTest.java
     CODE_FUNC=testMessageWithMDC
     CODE_LINE=36
-    THREAD_CONTEXT_SOME_KEY1=some value %d
-    THREAD_CONTEXT_SOME_KEY2=some other value with unicode: →←üöß
+    THREAD_CONTEXT_MY_KEY=some value
     SYSLOG_IDENTIFIER=log4j2-test
     LOG4J_APPENDER=Journal
     _PID=8224
