@@ -18,6 +18,9 @@ matrix:
     - os: linux
       jdk: openjdk10
       env: TEST_SUITE=build
+    - os: linux
+      jdk: openjdk11
+      env: TEST_SUITE=build
 
 script:
     - ./gradlew ${TEST_SUITE}
