@@ -16,9 +16,6 @@ matrix:
       jdk: oraclejdk9
       env: TEST_SUITE=build
     - os: linux
-      jdk: oraclejdk10
-      env: TEST_SUITE=build
-    - os: linux
       jdk: openjdk10
       env: TEST_SUITE=build
 
