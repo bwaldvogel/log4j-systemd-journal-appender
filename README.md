@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/bwaldvogel/log4j-systemd-journal-appender.png?branch=master)](https://travis-ci.org/bwaldvogel/log4j-systemd-journal-appender)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.bwaldvogel/log4j-systemd-journal-appender/badge.svg)](http://maven-badges.herokuapp.com/maven-central/de.bwaldvogel/log4j-systemd-journal-appender)
 [![BSD 3-Clause License](https://img.shields.io/github/license/bwaldvogel/log4j-systemd-journal-appender.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/BenediktWaldvogel)
 
 [Log4j][log4j] appender that logs event meta data such as the timestamp, the logger name, the exception stacktrace, [ThreadContext (aka MDC)][thread-context] or the Java thread name to [fields][systemd-journal-fields] in [systemd journal][systemd-journal] (aka "the Journal") .
 
@@ -138,6 +139,17 @@ Note that the [ThreadContext][thread-context] key-value pair `{"MY_KEY": "some v
 You can use the power of [systemd journal][systemd-journal] to filter for interesting messages. Example:
 
 `journalctl CODE_FUNC=testMessageWithMDC THREAD_NAME=main` will only show messages that are logged from the Java main thread in a method called `testMessageWithMDC`.
+
+
+## Contributing ##
+
+We are happy to receive pull-requests if you want to contribute code to the project.
+
+If you want to thank the author for this library or want to support the maintenance work,
+we are happy to receive a donation.
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/BenediktWaldvogel)
+
 
 ## Related Work ##
 
