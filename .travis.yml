@@ -10,4 +10,4 @@ env:
     - TERM=dumb
 
 script:
-    - gradle assemble
+    - ./gradlew assemble
