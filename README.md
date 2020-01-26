@@ -18,10 +18,10 @@ Add the following Maven dependency to your project:
 
 Configure the appender in your `log4j.properties`:
 ```
-log4j.appender.journal=de.bwaldvogel.SystemdJournalAppender
+log4j.appender.journal=de.bwaldvogel.log4j.SystemdJournalAppender
 ```
 
-Alternatively use `de.bwaldvogel.SystemdJournalAppenderWithLayout` if you want to format messages with a layout.
+Alternatively use `de.bwaldvogel.log4j.SystemdJournalAppenderWithLayout` if you want to format messages with a layout.
 
 ## Configuration ##
 
@@ -48,7 +48,7 @@ The appender can be configured with the following properties
 ```
 log4j.rootLogger=INFO, journal, console
 
-log4j.appender.journal=de.bwaldvogel.SystemdJournalAppender
+log4j.appender.journal=de.bwaldvogel.log4j.SystemdJournalAppender
 log4j.appender.journal.logStacktrace=true
 log4j.appender.journal.logThreadName=true
 log4j.appender.journal.logLoggerName=true
@@ -62,7 +62,7 @@ log4j.appender.console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%.
 ```
 log4j.rootLogger=INFO, journal, console
 
-log4j.appender.journal=de.bwaldvogel.SystemdJournalAppenderWithLayout
+log4j.appender.journal=de.bwaldvogel.log4j.SystemdJournalAppenderWithLayout
 log4j.appender.journal.layout=org.apache.log4j.PatternLayout
 log4j.appender.journal.layout.ConversionPattern=%-5p [%.20c] %m%n
 
