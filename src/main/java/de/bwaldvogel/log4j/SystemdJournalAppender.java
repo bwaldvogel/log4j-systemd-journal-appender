@@ -30,6 +30,8 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     private String syslogIdentifier;
 
+    private String syslogFacility;
+
     public SystemdJournalAppender() {
         journalLibrary = (SystemdJournalLibrary) Native.loadLibrary("systemd", SystemdJournalLibrary.class);
     }
@@ -89,6 +91,11 @@ public class SystemdJournalAppender extends AppenderSkeleton {
         if (syslogIdentifier != null && !syslogIdentifier.isEmpty()) {
             args.add("SYSLOG_IDENTIFIER=%s");
             args.add(syslogIdentifier);
+        }
+
+        if (syslogFacility != null && !syslogFacility.isEmpty()) {
+            args.add("SYSLOG_FACILITY=%d");
+            args.add(Integer.valueOf(syslogFacility));
         }
 
         if (logThreadName) {
@@ -167,5 +174,13 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     public void setSyslogIdentifier(String syslogIdentifier) {
         this.syslogIdentifier = syslogIdentifier;
+    }
+
+    public String getSyslogFacility() {
+        return syslogFacility;
+    }
+
+    public void setSyslogFacility(String syslogFacility) {
+        this.syslogFacility = syslogFacility;
     }
 }
