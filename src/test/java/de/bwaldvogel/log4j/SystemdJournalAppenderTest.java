@@ -34,7 +34,7 @@ public class SystemdJournalAppenderTest {
     @Test
     public void testAppend_Simple() {
         SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
-                false, false, false, false, false, false, null, null);
+                false, false, false, false, false, false, null, null, null);
 
         when(message.getFormattedMessage()).thenReturn("some message");
         LogEvent event = new Log4jLogEvent.Builder().setMessage(message).setLevel(Level.INFO).build();
@@ -54,7 +54,7 @@ public class SystemdJournalAppenderTest {
     public void testAppend_LogSource() {
 
         SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
-                true, false, false, false, false, false, null, null);
+                true, false, false, false, false, false, null, null, null);
 
         when(message.getFormattedMessage()).thenReturn("some message");
         LogEvent event = new Log4jLogEvent.Builder() //
@@ -84,7 +84,7 @@ public class SystemdJournalAppenderTest {
     public void testAppend_DoNotLogException() {
 
         SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
-                false, false, false, false, false, false, null, null);
+                false, false, false, false, false, false, null, null, null);
 
         when(message.getFormattedMessage()).thenReturn("some message");
 
@@ -110,7 +110,7 @@ public class SystemdJournalAppenderTest {
     public void testAppend_ThreadAndContext() {
 
         SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
-                false, false, true, true, true, true, null, "some-identifier");
+                false, false, true, true, true, true, null, "some-identifier", "3");
 
         when(message.getFormattedMessage()).thenReturn("some message");
 
@@ -140,6 +140,8 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add("bar");
         expectedArgs.add("SYSLOG_IDENTIFIER=%s");
         expectedArgs.add("some-identifier");
+        expectedArgs.add("SYSLOG_FACILITY=%d");
+        expectedArgs.add(3);
         expectedArgs.add(null);
 
         verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
