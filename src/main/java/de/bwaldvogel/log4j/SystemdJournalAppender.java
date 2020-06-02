@@ -82,58 +82,73 @@ public class SystemdJournalAppender extends AppenderSkeleton {
 
     @Override
     protected void append(LoggingEvent event) {
-        List<Object> args = new ArrayList<>();
-        args.add(buildRenderedMessage(event));
 
-        args.add("PRIORITY=%d");
-        args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
+        // systemd-journald does not expect any Newline characters in the input messages
+        // If it encounters any, it truncates the MESSAGE= argument and this prevents
+        // forwarding to syslog
+        //
+        // So, we must split up any multiline messages.
+        //
+        String lines[] = buildRenderedMessage(event).split("\\r?\\n");
+        if (lines != null) {
+            int len = lines.length;
+            for (int i = 0; i < len; i++) {
+                List<Object> args = new ArrayList<>();
 
-        if (syslogIdentifier != null && !syslogIdentifier.isEmpty()) {
-            args.add("SYSLOG_IDENTIFIER=%s");
-            args.add(syslogIdentifier);
-        }
+                args.add(lines[i].replace("\n", ""));
 
-        if (syslogFacility != null && !syslogFacility.isEmpty()) {
-            args.add("SYSLOG_FACILITY=%d");
-            args.add(Integer.valueOf(syslogFacility));
-        }
+                args.add("PRIORITY=%d");
+                args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
 
-        if (logThreadName) {
-            args.add("THREAD_NAME=%s");
-            args.add(event.getThreadName());
-        }
+                if (syslogIdentifier != null && !syslogIdentifier.isEmpty()) {
+                    args.add("SYSLOG_IDENTIFIER=%s");
+                    args.add(syslogIdentifier);
+                }
 
-        if (logLoggerName) {
-            args.add("LOG4J_LOGGER=%s");
-            args.add(event.getLogger().getName());
-        }
+                if (syslogFacility != null && !syslogFacility.isEmpty()) {
+                    args.add("SYSLOG_FACILITY=%d");
+                    args.add(Integer.valueOf(syslogFacility));
+                }
 
-        if (logAppenderName) {
-            args.add("LOG4J_APPENDER=%s");
-            args.add(getName());
-        }
+                if (logThreadName) {
+                    args.add("THREAD_NAME=%s");
+                    args.add(event.getThreadName());
+                }
 
-        if (logStacktrace && event.getThrowableStrRep() != null) {
-            StringBuilder sb = new StringBuilder();
-            for (String stackTrace : event.getThrowableStrRep()) {
-                sb.append(stackTrace).append(LINE_SEPARATOR);
+                if (logLoggerName) {
+                    args.add("LOG4J_LOGGER=%s");
+                    args.add(event.getLogger().getName());
+                }
+
+                if (logAppenderName) {
+                    args.add("LOG4J_APPENDER=%s");
+                    args.add(getName());
+                }
+
+                // TODO: Check that this works properly with multiline traces
+                if (logStacktrace && event.getThrowableStrRep() != null) {
+                    StringBuilder sb = new StringBuilder();
+                    for (String stackTrace : event.getThrowableStrRep()) {
+                        sb.append(stackTrace).append(LINE_SEPARATOR);
+                    }
+                    args.add("STACKTRACE=%s");
+                    args.add(sb.toString());
+                }
+
+                Map<?, ?> properties = event.getProperties();
+                if (logMdc && properties != null) {
+                    for (Entry<?, ?> entry : properties.entrySet()) {
+                        Object key = entry.getKey();
+                        args.add(mdcPrefix + normalizeKey(key) + "=%s");
+                        args.add(entry.getValue().toString());
+                    }
+                }
+
+                args.add(null);
+
+                journalLibrary.sd_journal_send("MESSAGE=%s", args.toArray());
+              }
             }
-            args.add("STACKTRACE=%s");
-            args.add(sb.toString());
-        }
-
-        Map<?, ?> properties = event.getProperties();
-        if (logMdc && properties != null) {
-            for (Entry<?, ?> entry : properties.entrySet()) {
-                Object key = entry.getKey();
-                args.add(mdcPrefix + normalizeKey(key) + "=%s");
-                args.add(entry.getValue().toString());
-            }
-        }
-
-        args.add(null);
-
-        journalLibrary.sd_journal_send("MESSAGE=%s", args.toArray());
     }
 
     protected String buildRenderedMessage(LoggingEvent event) {
