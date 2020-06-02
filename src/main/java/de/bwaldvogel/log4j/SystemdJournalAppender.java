@@ -139,73 +139,88 @@ public class SystemdJournalAppender extends AbstractAppender {
 
     @Override
     public void append(LogEvent event) {
-        List<Object> args = new ArrayList<>();
 
-        args.add(buildFormattedMessage(event));
+        // systemd-journald does not expect any Newline characters in the input messages
+        // If it encounters any, it truncates the MESSAGE= argument and this prevents
+        // forwarding to syslog
+        //
+        // So, we must split up any multiline messages.
+        //
+        String lines[] = buildFormattedMessage(event).split("\\r?\\n");
 
-        args.add("PRIORITY=%d");
-        args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
+        if (lines != null) {
+            int len = lines.length;
+            for (int i = 0; i < len; i++) {
+                List<Object> args = new ArrayList<>();
 
-        if (logThreadName) {
-            args.add("THREAD_NAME=%s");
-            args.add(event.getThreadName());
-        }
+                args.add(lines[i].replace("\n", ""));
 
-        if (logLoggerName) {
-            args.add("LOG4J_LOGGER=%s");
-            args.add(event.getLoggerName());
-        }
+                args.add("PRIORITY=%d");
+                args.add(Integer.valueOf(log4jLevelToJournalPriority(event.getLevel())));
 
-        if (logAppenderName) {
-            args.add("LOG4J_APPENDER=%s");
-            args.add(getName());
-        }
-
-        if (logStacktrace && event.getThrown() != null) {
-            StringWriter stacktrace = new StringWriter();
-            event.getThrown().printStackTrace(new PrintWriter(stacktrace));
-            args.add("STACKTRACE=%s");
-            args.add(stacktrace.toString());
-        }
-
-        if (logSource && event.getSource() != null) {
-            String fileName = event.getSource().getFileName();
-            args.add("CODE_FILE=%s");
-            args.add(fileName);
-
-            String methodName = event.getSource().getMethodName();
-            args.add("CODE_FUNC=%s");
-            args.add(methodName);
-
-            int lineNumber = event.getSource().getLineNumber();
-            args.add("CODE_LINE=%d");
-            args.add(Integer.valueOf(lineNumber));
-        }
-
-        if (logThreadContext) {
-            ReadOnlyStringMap context = event.getContextData();
-            if (context != null) {
-                for (Entry<String, String> entry : context.toMap().entrySet()) {
-                    String key = entry.getKey();
-                    args.add(threadContextPrefix + normalizeKey(key) + "=%s");
-                    args.add(entry.getValue());
+                if (logThreadName) {
+                    args.add("THREAD_NAME=%s");
+                    args.add(event.getThreadName());
                 }
+
+                if (logLoggerName) {
+                    args.add("LOG4J_LOGGER=%s");
+                    args.add(event.getLoggerName());
+                }
+
+                if (logAppenderName) {
+                    args.add("LOG4J_APPENDER=%s");
+                    args.add(getName());
+                }
+
+                // TODO: Verify that this works properly with multi-line stack trace
+                if (logStacktrace && event.getThrown() != null) {
+                    StringWriter stacktrace = new StringWriter();
+                    event.getThrown().printStackTrace(new PrintWriter(stacktrace));
+                    args.add("STACKTRACE=%s");
+                    args.add(stacktrace.toString());
+                }
+
+                if (logSource && event.getSource() != null) {
+                    String fileName = event.getSource().getFileName();
+                    args.add("CODE_FILE=%s");
+                    args.add(fileName);
+
+                    String methodName = event.getSource().getMethodName();
+                    args.add("CODE_FUNC=%s");
+                    args.add(methodName);
+
+                    int lineNumber = event.getSource().getLineNumber();
+                    args.add("CODE_LINE=%d");
+                    args.add(Integer.valueOf(lineNumber));
+                }
+
+                if (logThreadContext) {
+                    ReadOnlyStringMap context = event.getContextData();
+                    if (context != null) {
+                        for (Entry<String, String> entry : context.toMap().entrySet()) {
+                            String key = entry.getKey();
+                            args.add(threadContextPrefix + normalizeKey(key) + "=%s");
+                            args.add(entry.getValue());
+                        }
+                    }
+                }
+
+                if (syslogIdentifier != null && !syslogIdentifier.isEmpty()) {
+                    args.add("SYSLOG_IDENTIFIER=%s");
+                    args.add(syslogIdentifier);
+                }
+
+                if (syslogFacility != null && !syslogFacility.isEmpty()) {
+                    args.add("SYSLOG_FACILITY=%d");
+                    args.add(Integer.valueOf(syslogFacility));
+                }
+
+                args.add(null); // null terminated
+
+                journalLibrary.sd_journal_send("MESSAGE=%s", args.toArray());
             }
         }
-
-        if (syslogIdentifier != null && !syslogIdentifier.isEmpty()) {
-            args.add("SYSLOG_IDENTIFIER=%s");
-            args.add(syslogIdentifier);
-        }
-
-        if (syslogFacility != null && !syslogFacility.isEmpty()) {
-            args.add("SYSLOG_FACILITY=%d");
-            args.add(Integer.valueOf(syslogFacility));
-        }
-
-        args.add(null); // null terminated
-
-        journalLibrary.sd_journal_send("MESSAGE=%s", args.toArray());
     }
 
     private String buildFormattedMessage(LogEvent event) {
