@@ -49,7 +49,8 @@ Property name         | Default           | Type    | Description
 `logAppenderName`     | true              | boolean | Determines whether the appender name is logged. This data is logged in the user field `LOG4J_APPENDER`.
 `logThreadContext`    | true              | boolean | Determines whether the [thread context][thread-context] is logged. Each key/value pair is logged as user field with the `threadContextPrefix` prefix.
 `threadContextPrefix` | `THREAD_CONTEXT_` | String  | Determines how [thread context][thread-context] keys should be prefixed when `logThreadContext` is set to true. Note that keys need to match the regex pattern `[A-Z0-9_]+` and are normalized otherwise.
-`syslogIdentifier`    | null              | String  | This data is logged in the user field `SYSLOG_IDENTIFIER`.  If this is not set, the underlying system will use the command name (usually `java`) instead.
+`syslogIdentifier`    | null              | String  | This data is logged in the syslog compatibility field `SYSLOG_IDENTIFIER`. If this is not set, the underlying system will use the command name (usually `java`) instead.
+`syslogFacility`      | null              | Number  | This data is logged in the syslog compatibility field `SYSLOG_FACILITY`.
 
 ## Example ##
 
