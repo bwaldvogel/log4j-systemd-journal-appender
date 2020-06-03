@@ -1,5 +1,14 @@
-apply plugin: 'java'
-apply plugin: 'com.bmuschko.nexus'
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+}
 
 group = 'de.bwaldvogel'
 version = '2.4.0'
@@ -21,52 +30,78 @@ jar {
     }
 }
 
-// https://github.com/bmuschko/gradle-nexus-plugin
-buildscript {
+task sourceJar(type: Jar) {
+    archiveClassifier = "sources"
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = "javadoc"
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'de.bwaldvogel'
+            artifactId = 'log4j-systemd-journal-appender'
+            version = project.version
+            pom {
+                name = title
+                description = 'Log4j appender for systemd journal.'
+                url = 'https://github.com/bwaldvogel/log4j-systemd-journal-appender'
+                inceptionYear = '2014'
+
+                licenses {
+                    license {
+                        name = 'The BSD License'
+                        url = 'http://www.opensource.org/licenses/bsd-license.php'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'bwaldvogel'
+                        name = 'Benedikt Waldvogel'
+                        email = 'mail@bwaldvogel.de'
+                    }
+                }
+                scm {
+                    url = 'git@github.com:bwaldvogel/log4j-systemd-journal-appender.git'
+                    connection = 'scm:git:git@github.com:bwaldvogel/log4j-systemd-journal-appender.git'
+                    developerConnection = 'scm:git:git@github.com:bwaldvogel/log4j-systemd-journal-appender.git'
+                }
+            }
+
+            from components.java
+
+            artifact sourceJar
+            artifact javadocJar
+
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+        }
+    }
     repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1'
-    }
-}
-
-modifyPom {
-    project {
-        groupId        'de.bwaldvogel'
-        artifactId     'log4j-systemd-journal-appender'
-        name           title
-        description    'Log4j appender for systemd journal.'
-        url            url
-        inceptionYear '2014'
-
-        scm {
-            url 'git@github.com:bwaldvogel/log4j-systemd-journal-appender.git'
-            connection 'scm:git:git@github.com:bwaldvogel/log4j-systemd-journal-appender.git'
-            developerConnection 'scm:git:git@github.com:bwaldvogel/log4j-systemd-journal-appender.git'
-        }
-
-        licenses {
-            license {
-                name 'The BSD License'
-                url 'http://www.opensource.org/licenses/bsd-license.php'
-                distribution 'repo'
-            }
-        }
-
-        developers {
-            developer {
-                id 'bwaldvogel'
-                name 'Benedikt Waldvogel'
-                email 'mail@bwaldvogel.de'
+        maven {
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username = project.hasProperty('nexusUsername') ? project.property('nexusUsername') : System.getenv('NEXUS_USERNAME')
+                password = project.hasProperty('nexusPassword') ? project.property('nexusPassword') : System.getenv('NEXUS_PASSWORD')
             }
         }
     }
 }
 
-nexus {
-    sign = true
+signing {
+    useGpgCmd()
+    sign publishing.publications.mavenJava
 }
 
 repositories {
