@@ -1,14 +1,14 @@
 language: java
 
 jdk:
-    - openjdk8
-    - openjdk11
-    - openjdk12
-    - openjdk13
+  - openjdk8
+  - openjdk11
+  - openjdk12
+  - openjdk13
 
 script:
-    - ./gradlew ${TEST_SUITE}
+  - ./gradlew ${TEST_SUITE}
 
 branches:
-    - master
-    - 1.x
+  - master
+  - 1.x

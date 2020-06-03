@@ -90,5 +90,3 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.22.0'
 }
-
-// vim: set ts=4 sw=4 et:
