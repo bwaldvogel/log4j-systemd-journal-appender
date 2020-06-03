@@ -95,5 +95,3 @@ dependencies {
     testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: powermockVersion
     testCompile group: 'org.powermock', name: 'powermock-api-mockito', version: powermockVersion
 }
-
-// vim: set ts=4 sw=4 et:
