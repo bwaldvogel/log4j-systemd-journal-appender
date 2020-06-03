@@ -39,8 +39,10 @@ The appender can be configured with the following properties
        `appendStacktrace` | true         | boolean | `SystemdJournalAppenderWithLayout` only: Determines whether the full exception stack trace is to be appended to the log message.
 
 ### Runtime dependencies ###
-    - Linux with systemd-journal
-    - Log4j 1.2
+
+* Java 8 or later
+* Linux with systemd-journal
+* Log4j 1.2
 
 ## Examples ##
 
