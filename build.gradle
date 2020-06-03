@@ -32,10 +32,6 @@ buildscript {
     }
 }
 
-ext {
-    log4jVersion = '2.11.1'
-}
-
 modifyPom {
     project {
         groupId        'de.bwaldvogel'
@@ -83,12 +79,12 @@ wrapper {
 }
 
 dependencies {
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
-    compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.2'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: 'latest.release'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: 'latest.release'
+    implementation group: 'net.java.dev.jna', name: 'jna', version: 'latest.release'
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.22.0'
+    testImplementation group: 'junit', name: 'junit', version: 'latest.release'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: 'latest.release'
 
     components.all { ComponentMetadataDetails details ->
         details.statusScheme = ['candidate', 'release']
