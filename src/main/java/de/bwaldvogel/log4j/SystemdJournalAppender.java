@@ -1,6 +1,12 @@
 package de.bwaldvogel.log4j;
 
-import com.sun.jna.Native;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
@@ -15,13 +21,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.util.Booleans;
 import org.apache.logging.log4j.util.ReadOnlyStringMap;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import com.sun.jna.Native;
 
 @Plugin(name = "SystemdJournal", category = "Core", elementType = "appender", printObject = true)
 public class SystemdJournalAppender extends AbstractAppender {
@@ -38,6 +38,8 @@ public class SystemdJournalAppender extends AbstractAppender {
 
     private final boolean logAppenderName;
 
+    private final String logLoggerAppName;
+
     private final boolean logThreadContext;
 
     private final String threadContextPrefix;
@@ -47,8 +49,9 @@ public class SystemdJournalAppender extends AbstractAppender {
     private final String syslogFacility;
 
     SystemdJournalAppender(String name, Filter filter, Layout<?> layout, boolean ignoreExceptions,
-                           SystemdJournalLibrary journalLibrary, boolean logSource, boolean logStacktrace, boolean logThreadName,
-                           boolean logLoggerName, boolean logAppenderName, boolean logThreadContext, String threadContextPrefix, String syslogIdentifier, String syslogFacility) {
+            SystemdJournalLibrary journalLibrary, boolean logSource, boolean logStacktrace, boolean logThreadName,
+            boolean logLoggerName, boolean logAppenderName, boolean logThreadContext, String threadContextPrefix,
+            String syslogIdentifier, String syslogFacility, String logLoggerAppName) {
         super(name, filter, layout, ignoreExceptions);
         this.journalLibrary = journalLibrary;
         this.logSource = logSource;
@@ -64,6 +67,7 @@ public class SystemdJournalAppender extends AbstractAppender {
         }
         this.syslogIdentifier = syslogIdentifier;
         this.syslogFacility = syslogFacility;
+        this.logLoggerAppName = logLoggerAppName;
     }
 
     @PluginFactory
@@ -73,13 +77,13 @@ public class SystemdJournalAppender extends AbstractAppender {
             @PluginAttribute("logStacktrace") final String logStacktraceString,
             @PluginAttribute("logLoggerName") final String logLoggerNameString,
             @PluginAttribute("logAppenderName") final String logAppenderNameString,
+            @PluginAttribute("logLoggerAppName") final String logLoggerAppName,
             @PluginAttribute("logThreadName") final String logThreadNameString,
             @PluginAttribute("logThreadContext") final String logThreadContextString,
             @PluginAttribute("threadContextPrefix") final String threadContextPrefix,
             @PluginAttribute("syslogIdentifier") final String syslogIdentifier,
             @PluginAttribute("syslogFacility") final String syslogFacility,
-            @PluginElement("Layout") final Layout<?> layout,
-            @PluginElement("Filter") final Filter filter,
+            @PluginElement("Layout") final Layout<?> layout, @PluginElement("Filter") final Filter filter,
             @PluginConfiguration final Configuration config) {
         final boolean ignoreExceptions = Booleans.parseBoolean(ignoreExceptionsString, true);
         final boolean logSource = Booleans.parseBoolean(logSourceString, false);
@@ -98,13 +102,15 @@ public class SystemdJournalAppender extends AbstractAppender {
         try {
             journalLibrary = Native.loadLibrary("systemd", SystemdJournalLibrary.class);
         } catch (UnsatisfiedLinkError e) {
-            throw new RuntimeException("Failed to load systemd library." +
-                " Please note that JNA requires an executable temporary folder." +
-                " It can be explicitly defined with -Djna.tmpdir", e);
+            throw new RuntimeException(
+                    "Failed to load systemd library." + " Please note that JNA requires an executable temporary folder."
+                            + " It can be explicitly defined with -Djna.tmpdir",
+                    e);
         }
 
-        return new SystemdJournalAppender(name, filter, layout, ignoreExceptions, journalLibrary, logSource, logStacktrace,
-                logThreadName, logLoggerName, logAppenderName, logThreadContext, threadContextPrefix, syslogIdentifier, syslogFacility);
+        return new SystemdJournalAppender(name, filter, layout, ignoreExceptions, journalLibrary, logSource,
+                logStacktrace, logThreadName, logLoggerName, logAppenderName, logThreadContext, threadContextPrefix,
+                syslogIdentifier, syslogFacility, logLoggerAppName);
     }
 
     private int log4jLevelToJournalPriority(Level level) {
@@ -152,7 +158,11 @@ public class SystemdJournalAppender extends AbstractAppender {
         }
 
         if (logLoggerName) {
-            args.add("LOG4J_LOGGER=%s");
+            if (logLoggerAppName != null && !logLoggerAppName.isEmpty()) {
+                args.add(logLoggerAppName + "_LOGGER=%s");
+            } else {
+                args.add("LOG4J_LOGGER=%s");
+            }
             args.add(event.getLoggerName());
         }
 
