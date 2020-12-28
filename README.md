@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/bwaldvogel/log4j-systemd-journal-appender.png?branch=master)](https://travis-ci.org/bwaldvogel/log4j-systemd-journal-appender)
+[![CI](https://github.com/bwaldvogel/log4j-systemd-journal-appender/workflows/CI/badge.svg)](https://github.com/bwaldvogel/log4j-systemd-journal-appender/actions)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.bwaldvogel/log4j-systemd-journal-appender/badge.svg)](http://maven-badges.herokuapp.com/maven-central/de.bwaldvogel/log4j-systemd-journal-appender)
 [![BSD 3-Clause License](https://img.shields.io/github/license/bwaldvogel/log4j-systemd-journal-appender.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/BenediktWaldvogel)
