@@ -1,6 +1,8 @@
 package de.bwaldvogel.log4j;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +35,8 @@ public class SystemdJournalAppenderTest {
 
     @Test
     public void testAppend_Simple() {
-        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
-                false, false, false, false, false, false, null, null, null);
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false,
+                journalLibrary, false, false, false, false, false, false, null, null, null, null);
 
         when(message.getFormattedMessage()).thenReturn("some message");
         LogEvent event = new Log4jLogEvent.Builder().setMessage(message).setLevel(Level.INFO).build();
@@ -53,8 +55,8 @@ public class SystemdJournalAppenderTest {
     @Test
     public void testAppend_LogSource() {
 
-        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
-                true, false, false, false, false, false, null, null, null);
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false,
+                journalLibrary, true, false, false, false, false, false, null, null, null, null);
 
         when(message.getFormattedMessage()).thenReturn("some message");
         LogEvent event = new Log4jLogEvent.Builder() //
@@ -74,7 +76,7 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add("CODE_FUNC=%s");
         expectedArgs.add("testAppend_LogSource");
         expectedArgs.add("CODE_LINE=%d");
-        expectedArgs.add(Integer.valueOf(66));
+        expectedArgs.add(Integer.valueOf(68));
         expectedArgs.add(null);
 
         verify(journalLibrary).sd_journal_send("MESSAGE=%s", expectedArgs.toArray());
@@ -83,8 +85,8 @@ public class SystemdJournalAppenderTest {
     @Test
     public void testAppend_DoNotLogException() {
 
-        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
-                false, false, false, false, false, false, null, null, null);
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false,
+                journalLibrary, false, false, false, false, false, false, null, null, null, null);
 
         when(message.getFormattedMessage()).thenReturn("some message");
 
@@ -109,8 +111,8 @@ public class SystemdJournalAppenderTest {
     @Test
     public void testAppend_ThreadAndContext() {
 
-        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false, journalLibrary,
-                false, false, true, true, true, true, null, "some-identifier", "3");
+        SystemdJournalAppender journalAppender = new SystemdJournalAppender("Journal", null, null, false,
+                journalLibrary, false, false, true, true, true, true, null, "some-identifier", "3", "TEST_LOGGER_NAME");
 
         when(message.getFormattedMessage()).thenReturn("some message");
 
@@ -132,7 +134,7 @@ public class SystemdJournalAppenderTest {
         expectedArgs.add(6);
         expectedArgs.add("THREAD_NAME=%s");
         expectedArgs.add("the thread");
-        expectedArgs.add("LOG4J_LOGGER=%s");
+        expectedArgs.add("TEST_LOGGER_NAME_LOGGER=%s");
         expectedArgs.add("some logger");
         expectedArgs.add("LOG4J_APPENDER=%s");
         expectedArgs.add("Journal");
