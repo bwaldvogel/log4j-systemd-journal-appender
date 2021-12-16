@@ -49,7 +49,7 @@ public class SystemdJournalAppender extends AbstractAppender {
     SystemdJournalAppender(String name, Filter filter, Layout<?> layout, boolean ignoreExceptions,
                            SystemdJournalLibrary journalLibrary, boolean logSource, boolean logStacktrace, boolean logThreadName,
                            boolean logLoggerName, boolean logAppenderName, boolean logThreadContext, String threadContextPrefix, String syslogIdentifier, String syslogFacility) {
-        super(name, filter, layout, ignoreExceptions);
+        super(name, filter, layout, ignoreExceptions, null);
         this.journalLibrary = journalLibrary;
         this.logSource = logSource;
         this.logStacktrace = logStacktrace;
@@ -96,7 +96,7 @@ public class SystemdJournalAppender extends AbstractAppender {
 
         final SystemdJournalLibrary journalLibrary;
         try {
-            journalLibrary = Native.loadLibrary("systemd", SystemdJournalLibrary.class);
+            journalLibrary = Native.load("systemd", SystemdJournalLibrary.class);
         } catch (UnsatisfiedLinkError e) {
             throw new RuntimeException("Failed to load systemd library." +
                 " Please note that JNA requires an executable temporary folder." +
