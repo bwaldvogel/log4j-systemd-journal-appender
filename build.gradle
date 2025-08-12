@@ -116,6 +116,8 @@ wrapper {
 dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: 'latest.release'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: 'latest.release'
+    annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-core', version: 'latest.release'
+
     implementation group: 'net.java.dev.jna', name: 'jna', version: 'latest.release'
 
     testImplementation group: 'junit', name: 'junit', version: 'latest.release'
