@@ -111,7 +111,7 @@ repositories {
 }
 
 wrapper {
-    gradleVersion = '7.3.3'
+    gradleVersion = '9.0.0'
     distributionType = Wrapper.DistributionType.ALL
 }
 
