@@ -25,7 +25,7 @@ See the [`1.x` branch][1.x-branch] of this project.
 
 ### Runtime dependencies ###
 
-- Java 8 or later
+- Java 17 or later
 - Linux with systemd-journal
 - Log4j 2.x
 
